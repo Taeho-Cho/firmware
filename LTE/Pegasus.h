@@ -61,7 +61,6 @@ typedef enum {
     eLTE_CMD_GET_TIME,
     eLTE_CMD_GET_CNUM,
     eLTE_CMD_SEND_DATA,
-//    eLTE_CMD_TCPCL,
 } eLTE_CMD;
 
 PEGASUS_EXT uint8_t Pegasus_run(eLTE_CMD eLTE_cmd);
