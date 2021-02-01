@@ -9,11 +9,11 @@
     #define PEGASUS_EXT extern
 #endif
 
-#define IP_ADDRESS1             (125)
-#define IP_ADDRESS2             (191)
-#define IP_ADDRESS3             (5)
-#define IP_ADDRESS4             (19)
-#define PORT_NUMBER             (50000)
+#define IP_ADDRESS1             ( )
+#define IP_ADDRESS2             ( )
+#define IP_ADDRESS3             ( )
+#define IP_ADDRESS4             ( )
+#define PORT_NUMBER             ( )
 
 #define PEGASUS_TIMEOUT_LIMIT   (1200)
 
