@@ -31,9 +31,8 @@ uint8_t CQ_push(CIRCULAR_QUEUE *cq, DATA_TYPE data)
 {
   if( CQ_is_full(cq) )   return 0;
     
-  cq->tail %= MAX_NUMBER_OF_DATA;
-
   cq->data[cq->tail++] = data;
+  cq->tail %= MAX_NUMBER_OF_DATA;
   return 1;
 }
 
@@ -42,9 +41,9 @@ DATA_TYPE CQ_pop(CIRCULAR_QUEUE *cq)
 {
     if( CQ_is_empty(cq) ) return 0;
     
+    DATA_TYPE buf = cq->data[cq->head++];
     cq->head %= MAX_NUMBER_OF_DATA;
-      
-    return cq->data[cq->head++];
+    return buf;
 }
 
 
