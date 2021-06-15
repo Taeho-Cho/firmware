@@ -330,13 +330,7 @@ static eLTE_STATE PegasusParser(uint8_t pData)
 
 void USART1_IRQHandler(void)
 {
-  /* USER CODE BEGIN USART1_IRQn 0 */
 
-  /* USER CODE END USART1_IRQn 0 */
-  //HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-
-  
   /* Overrun Error: when the ORE bit is set, clear by writing 1 to the ORECF */
     if( (huart1.Instance->ISR & USART_ISR_ORE) != 0U )
     {
@@ -349,6 +343,5 @@ void USART1_IRQHandler(void)
         CQ_push(&cq, (uint8_t)huart1.Instance->RDR);
     }
     
-  /* USER CODE END USART1_IRQn 1 */
 }
 
