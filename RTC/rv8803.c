@@ -69,21 +69,9 @@ void rtc_timer_init() {
 }
 
 
-/**
-  * @brief I2C3 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_I2C3_Init(void)
 {
 
-  /* USER CODE BEGIN I2C3_Init 0 */
-
-  /* USER CODE END I2C3_Init 0 */
-
-  /* USER CODE BEGIN I2C3_Init 1 */
-
-  /* USER CODE END I2C3_Init 1 */
   hi2c3.Instance = I2C3;
   hi2c3.Init.Timing = 0x00702685;
   hi2c3.Init.OwnAddress1 = 0;
@@ -109,9 +97,6 @@ static void MX_I2C3_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN I2C3_Init 2 */
-
-  /* USER CODE END I2C3_Init 2 */
 
 }
 
