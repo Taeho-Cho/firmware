@@ -1,8 +1,6 @@
 #ifndef _CIRCULAR_QUEUE_H_
 #define _CIRCULAR_QUEUE_H_
 
-#include "main.h"
-
 #ifdef _CIRCULAR_QUEUE_C_
     #define CIRCULAR_QUEUE_EXT
 #else 
