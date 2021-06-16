@@ -7,7 +7,7 @@ void CQ_init(CIRCULAR_QUEUE *cq)
 {
     cq->head = 0;
     cq->tail = 0;
-    memset(cq->data, 0, sizeof(DATA_TYPE)*MAX_NUMBER_OF_DATA);
+    memset(cq->data, 0, sizeof(DATA_TYPE) * MAX_NUMBER_OF_DATA);
 }
 
 
