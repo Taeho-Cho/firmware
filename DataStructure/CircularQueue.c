@@ -1,4 +1,3 @@
-
 #define _CIRCULAR_QUEUE_C_
     #include "CircularQueue.h"
 #undef _CIRCULAR_QUEUE_C_
@@ -11,57 +10,43 @@ void CQ_init(CIRCULAR_QUEUE *cq)
 }
 
 
-uint8_t CQ_is_empty(CIRCULAR_QUEUE *cq)
+Boolean CQ_isEmpty(CIRCULAR_QUEUE *cq)
 {
-  if(cq->tail == cq->head) return 1;
-  
-  return 0;
+  if(cq->tail == cq->head) return True;
+
+  return False;
 }
 
 
-uint8_t CQ_is_full(CIRCULAR_QUEUE *cq)
+Boolean CQ_isFull(CIRCULAR_QUEUE *cq)
 {
-  if( ((cq->tail + 1)%MAX_NUMBER_OF_DATA) == cq->head) return 1;
-  
-  return 0;
+  if( ( (cq->tail + 1) % MAX_NUMBER_OF_DATA ) == cq->head) return True;
+
+  return False;
 }
 
 
-uint8_t CQ_push(CIRCULAR_QUEUE *cq, DATA_TYPE data)
+Boolean CQ_enqueue(CIRCULAR_QUEUE *cq, DATA_TYPE data)
 {
-  if( CQ_is_full(cq) )   return 0;
-    
-  cq->tail = (cq->tail+1)%MAX_NUMBER_OF_DATA;
+  if( CQ_is_full(cq) )   return False;
+
+  cq->tail = (cq->tail + 1) % MAX_NUMBER_OF_DATA;
   cq->data[cq->tail] = data;
-  return 1;
+  return True;
 }
 
 
-DATA_TYPE CQ_pop(CIRCULAR_QUEUE *cq)
+Boolean CQ_dequeue(CIRCULAR_QUEUE *cq, DATA_TYPE *data)
 {
-    if( CQ_is_empty(cq) ) return 0;
-    
-    cq->head = (cq->head+1)%MAX_NUMBER_OF_DATA;
-    return cq->data[cq->head];
+    if( CQ_is_empty(cq) ) return False;
+
+    *data = cq->data[cq->head];
+    cq->head = (cq->head + 1) % MAX_NUMBER_OF_DATA;
+    return True;
 }
 
 
-DATA_TYPE CQ_peek(CIRCULAR_QUEUE *cq, uint8_t index)
+uint32_t CQ_NumberOfData(CIRCULAR_QUEUE *cq)
 {
-    if( CQ_is_empty(cq) ) return 0;
-    
-    if( ((cq->head + index)%MAX_NUMBER_OF_DATA) > cq->tail ) return 0;
-
-    return cq->data[cq->head + index];
-}
-
-
-uint8_t CQ_delete(CIRCULAR_QUEUE *cq, uint8_t number_of_data)
-{   
-    for(uint8_t i=0; i < number_of_data; i++ )
-    {
-        if( CQ_pop(cq) == 0) return 0;
-    }
-
-    return 1;
+	return (cq->tail + MAX_NUMBER_OF_DATA - cq->head) % MAX_NUMBER_OF_DATA;
 }
