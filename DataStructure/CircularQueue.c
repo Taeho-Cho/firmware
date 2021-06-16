@@ -1,6 +1,6 @@
 
 #define _CIRCULAR_QUEUE_C_
-    #include "circular_queue.h"
+    #include "CircularQueue.h"
 #undef _CIRCULAR_QUEUE_C_
 
 void CQ_init(CIRCULAR_QUEUE *cq)
