@@ -2,7 +2,7 @@
     #include "CircularQueue.h"
 #undef _CIRCULAR_QUEUE_C_
 
-void CQ_init(CIRCULAR_QUEUE *cq)
+void CQ_init(CircularQueue *cq)
 {
     cq->head = 0;
     cq->tail = 0;
@@ -10,7 +10,7 @@ void CQ_init(CIRCULAR_QUEUE *cq)
 }
 
 
-Boolean CQ_isEmpty(CIRCULAR_QUEUE *cq)
+Boolean CQ_isEmpty(CircularQueue *cq)
 {
   if(cq->tail == cq->head) return True;
 
@@ -18,7 +18,7 @@ Boolean CQ_isEmpty(CIRCULAR_QUEUE *cq)
 }
 
 
-Boolean CQ_isFull(CIRCULAR_QUEUE *cq)
+Boolean CQ_isFull(CircularQueue *cq)
 {
   if( ( (cq->tail + 1) % MAX_NUMBER_OF_DATA ) == cq->head) return True;
 
@@ -26,7 +26,7 @@ Boolean CQ_isFull(CIRCULAR_QUEUE *cq)
 }
 
 
-Boolean CQ_enqueue(CIRCULAR_QUEUE *cq, DATA_TYPE data)
+Boolean CQ_enqueue(CircularQueue *cq, DATA_TYPE data)
 {
   if( CQ_is_full(cq) )   return False;
 
@@ -36,7 +36,7 @@ Boolean CQ_enqueue(CIRCULAR_QUEUE *cq, DATA_TYPE data)
 }
 
 
-Boolean CQ_dequeue(CIRCULAR_QUEUE *cq, DATA_TYPE *data)
+Boolean CQ_dequeue(CircularQueue *cq, DATA_TYPE *data)
 {
     if( CQ_is_empty(cq) ) return False;
 
@@ -46,7 +46,7 @@ Boolean CQ_dequeue(CIRCULAR_QUEUE *cq, DATA_TYPE *data)
 }
 
 
-uint32_t CQ_NumberOfData(CIRCULAR_QUEUE *cq)
+uint32_t CQ_NumberOfData(CircularQueue *cq)
 {
 	return (cq->tail + MAX_NUMBER_OF_DATA - cq->head) % MAX_NUMBER_OF_DATA;
 }
