@@ -20,16 +20,16 @@ typedef struct {
 	uint32_t head;
 	uint32_t tail;
 	DATA_TYPE data[MAX_NUMBER_OF_DATA];
-} CIRCULAR_QUEUE;
+} CircularQueue;
 
-CIRCULAR_QUEUE_EXT void CQ_init(CIRCULAR_QUEUE *cq);
+CIRCULAR_QUEUE_EXT void CQ_init(CircularQueue *cq);
 
-CIRCULAR_QUEUE_EXT Boolean CQ_isEmpty(CIRCULAR_QUEUE *cq);
-CIRCULAR_QUEUE_EXT Boolean CQ_isFull(CIRCULAR_QUEUE *cq);
+CIRCULAR_QUEUE_EXT Boolean CQ_isEmpty(CircularQueue *cq);
+CIRCULAR_QUEUE_EXT Boolean CQ_isFull(CircularQueue *cq);
 
-CIRCULAR_QUEUE_EXT Boolean CQ_enqueue(CIRCULAR_QUEUE *cq, DATA_TYPE data);
-CIRCULAR_QUEUE_EXT Boolean CQ_dequeue(CIRCULAR_QUEUE *cq, DATA_TYPE *data);
+CIRCULAR_QUEUE_EXT Boolean CQ_enqueue(CircularQueue *cq, DATA_TYPE data);
+CIRCULAR_QUEUE_EXT Boolean CQ_dequeue(CircularQueue *cq, DATA_TYPE *data);
 
-CIRCULAR_QUEUE_EXT uint32_t CQ_NumberOfData(CIRCULAR_QUEUE *cq);
+CIRCULAR_QUEUE_EXT uint32_t CQ_NumberOfData(CircularQueue *cq);
 
 #endif
