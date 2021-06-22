@@ -28,7 +28,7 @@ Boolean CQ_isFull(CircularQueue *cq)
 
 Boolean CQ_enqueue(CircularQueue *cq, DATA_TYPE data)
 {
-  if( CQ_is_full(cq) )   return False;
+  if( CQ_isFull(cq) )   return False;
 
   cq->tail = (cq->tail + 1) % MAX_NUMBER_OF_DATA;
   cq->data[cq->tail] = data;
@@ -38,7 +38,7 @@ Boolean CQ_enqueue(CircularQueue *cq, DATA_TYPE data)
 
 Boolean CQ_dequeue(CircularQueue *cq, DATA_TYPE *data)
 {
-    if( CQ_is_empty(cq) ) return False;
+    if( CQ_isEmpty(cq) ) return False;
 
     *data = cq->data[cq->head];
     cq->head = (cq->head + 1) % MAX_NUMBER_OF_DATA;
