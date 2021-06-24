@@ -10,39 +10,39 @@ void CQ_init(CircularQueue *cq)
 }
 
 
-Boolean CQ_isEmpty(CircularQueue *cq)
+eCQ_Boolean_t CQ_isEmpty(CircularQueue *cq)
 {
-  if(cq->tail == cq->head) return True;
+    if(cq->tail == cq->head) return eCQ_True;
 
-  return False;
+    return eCQ_False;
 }
 
 
-Boolean CQ_isFull(CircularQueue *cq)
+eCQ_Boolean_t CQ_isFull(CircularQueue *cq)
 {
-  if( ( (cq->tail + 1) % MAX_NUMBER_OF_DATA ) == cq->head) return True;
+    if( ( (cq->tail + 1) % MAX_NUMBER_OF_DATA ) == cq->head) return eCQ_True;
 
-  return False;
+    return eCQ_False;
 }
 
 
-Boolean CQ_enqueue(CircularQueue *cq, DATA_TYPE data)
+eCQ_Boolean_t CQ_enqueue(CircularQueue *cq, DATA_TYPE data)
 {
-  if( CQ_isFull(cq) )   return False;
+    if( CQ_isFull(cq) )   return eCQ_False;
 
-  cq->tail = (cq->tail + 1) % MAX_NUMBER_OF_DATA;
-  cq->data[cq->tail] = data;
-  return True;
+    cq->tail = (cq->tail + 1) % MAX_NUMBER_OF_DATA;
+    cq->data[cq->tail] = data;
+    return eCQ_True;
 }
 
 
-Boolean CQ_dequeue(CircularQueue *cq, DATA_TYPE *data)
+eCQ_Boolean_t CQ_dequeue(CircularQueue *cq, DATA_TYPE *data)
 {
-    if( CQ_isEmpty(cq) ) return False;
+    if( CQ_isEmpty(cq) ) return eCQ_False;
 
     *data = cq->data[cq->head];
     cq->head = (cq->head + 1) % MAX_NUMBER_OF_DATA;
-    return True;
+    return eCQ_True;
 }
 
 
