@@ -13,16 +13,16 @@
 #define DATA_TYPE           uint8_t
 
 typedef enum {
-	eCQ_False = 0U, 
+    eCQ_False = 0U, 
     eCQ_True  = 1U
 } eCQ_Boolean_t;
 
 typedef struct 
 {
-	uint32_t head;
-	uint32_t tail;
-	DATA_TYPE data[MAX_NUMBER_OF_DATA];
-}CircularQueue;
+    uint32_t head;
+    uint32_t tail;
+    DATA_TYPE data[MAX_NUMBER_OF_DATA];
+} CircularQueue;
 
 CIRCULAR_QUEUE_EXT void CQ_init(CircularQueue *cq);
 
