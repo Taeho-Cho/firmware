@@ -40,8 +40,8 @@ eCQ_Boolean_t CQ_dequeue(CircularQueue *cq, DATA_TYPE *data)
 {
     if( CQ_isEmpty(cq) ) return eCQ_False;
 
-    *data = cq->data[cq->head];
     cq->head = (cq->head + 1) % MAX_NUMBER_OF_DATA;
+    *data = cq->data[cq->head];
     return eCQ_True;
 }
 
