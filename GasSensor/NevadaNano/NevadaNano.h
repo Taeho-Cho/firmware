@@ -9,7 +9,7 @@
  *  1. After powering on the sensor, wait 3 seconds for the sensor to boot
  *  2. Read MPS Status (Read Register: 0x41)
  *  3. if the Status is OK, Read MPS Version Info (Read Register: 0x42)
- *  4. Start measurement in ?�continuous??mode (Write Register: 0x61, Value: 0x2)
+ *  4. Start measurement in continuous mode (Write Register: 0x61, Value: 0x2)
  *  5. Wait 2 seconds and Get Answer (Read Register: 0x01)
  *  6. repeat
  *
@@ -226,7 +226,7 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
 	char SERIAL_NUM[32];
-	uint32_t SENSOR_TYPE; 	// ?�MPS Flammable Gas Sensor??sensor type = 0x03
+	uint32_t SENSOR_TYPE; 	// MPS Flammable Gas Sensor type = 0x03
 	char CAL_DATE[16]; 		// Date of last calibration, MM/DD/YYYY
 	char MFG_DATE[16]; 		// Date of manufacture,      MM/DD/YYYY
 } sSENSOR_INFO_t;
