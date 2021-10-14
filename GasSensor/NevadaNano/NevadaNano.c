@@ -139,7 +139,7 @@ static bool setRequestPacket(eCOMMAND_t comm)
 	{
 		sNevadaNanoHandler.RequestPacket.PacketHeader.CmdID  = eCOMMAND_MEAS;
 		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = ePAYLOAD_LENGTH_MEAS_REQUEST;
-		sNevadaNanoHandler.RequestPacket.measurement 		 = sNevadaNanoHandler.Meas;
+		sNevadaNanoHandler.RequestPacket.measurement 	     = sNevadaNanoHandler.Meas;
 	}
 	else
 	{
@@ -148,9 +148,9 @@ static bool setRequestPacket(eCOMMAND_t comm)
 	}
 
 	sNevadaNanoHandler.RequestPacket.PacketHeader.Reserved = RESERVED;
-	sNevadaNanoHandler.RequestPacket.PacketHeader.Checksum = crc_generate( (uint8_t *) &sNevadaNanoHandler.RequestPacket,
-																			sizeof(sREQUEST_PACKET_HEADER_t) + sNevadaNanoHandler.RequestPacket.PacketHeader.Length,
-																			CRC_START_VALUE );
+	sNevadaNanoHandler.RequestPacket.PacketHeader.Checksum = crc_generate( (uint8_t*) &sNevadaNanoHandler.RequestPacket,
+										sizeof(sREQUEST_PACKET_HEADER_t) + sNevadaNanoHandler.RequestPacket.PacketHeader.Length,
+										CRC_START_VALUE );
 
 	return ret;
 }
@@ -181,7 +181,7 @@ static bool setReplyPacket()
 
 	if( checkCRC( (uint8_t*)&tempReplyPacket, sNevadaNanoHandler.Comm ) != true ) 	ret = false;
 	if( sNevadaNanoHandler.Comm != (eCOMMAND_t)tempReplyPacket.PacketHeader.CmdID ) ret = false;
-	if( (eSTATUS_t)tempReplyPacket.PacketHeader.Status != eSTATUS_OK )  			ret = false;
+	if( (eSTATUS_t)tempReplyPacket.PacketHeader.Status != eSTATUS_OK )  		ret = false;
 
 	sNevadaNanoHandler.Stat = (eSTATUS_t)tempReplyPacket.PacketHeader.Status;
 	sNevadaNanoHandler.ReplyPacket = tempReplyPacket;
@@ -203,20 +203,20 @@ bool checkCRC(uint8_t *buffer, eCOMMAND_t comm)
 	{
 	case eCOMMAND_STATUS : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY,
-								CRC_START_VALUE );
+					sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY,
+					CRC_START_VALUE );
 	} break;
 
 	case eCOMMAND_MEAS : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY,
-								CRC_START_VALUE );
+					sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY,
+					CRC_START_VALUE );
 	} break;
 
 	case eCOMMAND_ANSWER : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY,
-								CRC_START_VALUE );
+					sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY,
+					CRC_START_VALUE );
 	} break;
 
 	default : break;
