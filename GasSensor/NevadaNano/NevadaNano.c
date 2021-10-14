@@ -1,109 +1,231 @@
+/*
+ * NevadaNano.c
+ *
+ *  Created on: Oct 8, 2021
+ *      Author: chotaeho
+ */
 
-#define _NEVADA_NANO_C_ 
-    #include "NevadaNano.h"
-#undef _NEVADA_NANO_C_
+#include "NevadaNano.h"
+#include "dma.h"
+#include "usart.h"
 
-static void MX_USART3_UART_Init(void);
-static void nevada_RxCpltCallback(UART_HandleTypeDef *huart);
 
 static uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue);
+static bool packetCommunication(eCOMMAND_t);
+static bool setRequestPacket(eCOMMAND_t);
+static bool setReplyPacket();
+static bool checkCRC(uint8_t *, eCOMMAND_t);
 
-UART_HandleTypeDef huart3;
 
-static Command_Request     cmdRequest;
-static Command_Reply       cmdReply;   
+static sNEVADANANO_HANDLER_t sNevadaNanoHandler;
 
-static uint8_t Reply_buf[REPLY_BUFFER_SIZE];
+uint8_t RX_BUFFER[RX_BUFFERFER_SIZE];
 
-void nevada_init()
-{  
-    MX_USART3_UART_Init();
-  
-    /* USE_HAL_UART_REGISTER_CALLBACKS set to 1U */
-    HAL_UART_RegisterCallback(&huart3, HAL_UART_RX_COMPLETE_CB_ID, nevada_RxCpltCallback);
-      
-    HAL_Delay(3000);
-    
-    memset(&cmdRequest, 0, sizeof(Command_Request));
-    memset(&cmdReply, 0, sizeof(Command_Reply));
-    memset(&Reply_buf, 0, REPLY_BUFFER_SIZE);
-    
-    cmdRequest.CmdID    = NevadaCmd_STATUS;
-    cmdRequest.Checksum = crc_generate((uint8_t*)&cmdRequest, 8 + cmdRequest.Length, CHECKSUM_START_VALUE);
-  
-    HAL_UART_Transmit  (&huart3, (uint8_t*)&cmdRequest, 8 + cmdRequest.Length, 1000);
-    HAL_UART_Receive_IT(&huart3, (uint8_t*)&Reply_buf, 7);
+
+bool initSensor(void)
+{
+	bool ret = true;
+
+	MX_DMA_Init();
+	MX_UART4_Init();
+
+	HAL_Delay(3000);
+
+	if(packetCommunication(eCOMMAND_STATUS) == false) ret = false;
+
+	return ret;
 }
 
 
-/**
-  * @brief  Rx Transfer completed callback.
-  * @param  huart UART handle.
-  * @retval None
-  */
-void nevada_RxCpltCallback(UART_HandleTypeDef *huart)
+bool startMeasurement(void)
 {
-    uint16_t buf_index = 0;
-    
-    while( cmdRequest.CmdID != Reply_buf[buf_index]) 
-    {
-        buf_index++;
-        if(buf_index >= REPLY_BUFFER_SIZE) { nevada_init(); return; }
-    }
+	bool ret = true;
 
-    memcpy(&cmdReply, &Reply_buf[buf_index], sizeof(Command_Reply));
-    
-    if(cmdReply.Status == NevadaStatus_HW_ERR_VREF) cmdReply.CmdID = NevadaCmd_none;
-    
+	if(packetCommunication(eCOMMAND_MEAS) == false) ret = false;
+
+	HAL_Delay(1000);
+
+	return ret;
 }
 
 
-uint8_t nevada_run()
+bool getAnswer(void)
 {
-  switch(cmdReply.CmdID)
-  {
-    case NevadaCmd_none : break;
-  
-    case NevadaCmd_STATUS : {
-    
-        memset(&cmdRequest, 0, sizeof(Command_Request));
-        cmdRequest.CmdID    = NevadaCmd_MEAS;
-        cmdRequest.Length   = 1;
-        cmdRequest.Payload  = 0x02;
-        cmdRequest.Checksum = crc_generate((uint8_t*)&cmdRequest, 8 /* = header size */ + cmdRequest.Length, CHECKSUM_START_VALUE);
-    
-        HAL_UART_Transmit  (&huart3, (uint8_t*)&cmdRequest, 8 /* = header size */ + cmdRequest.Length, 1000);
+	bool ret = true;
 
-        cmdReply.CmdID = NevadaCmd_MEAS;
-        HAL_Delay(2000);
-    } break;
-    
-    case NevadaCmd_MEAS   :     
-    case NevadaCmd_ANSWER : {
-        HAL_Delay(1000);
-    
-        memset(&cmdRequest, 0, sizeof(Command_Request));
-        cmdRequest.CmdID    = NevadaCmd_ANSWER;
-        cmdRequest.Checksum = crc_generate((uint8_t*)&cmdRequest, 8 + cmdRequest.Length, CHECKSUM_START_VALUE);
-  
-        HAL_UART_Transmit  (&huart3, (uint8_t*)&cmdRequest, 8 + cmdRequest.Length, 1000);
-        HAL_UART_Receive_IT(&huart3, (uint8_t*)&Reply_buf, sizeof(Command_Reply)); 
-    } break;    
-    
-    default   : {
-    
-    } break;
-  }
-  
-  if((cmdReply.CmdID == NevadaCmd_ANSWER) && (((Answer_Data*)cmdReply.Payload)->CYCLE_COUNT > 10)) return True;
-  
-  return False;
+	HAL_Delay(1000);
+
+	if(packetCommunication(eCOMMAND_ANSWER) == false) ret = false;
+
+	return ret;
 }
 
 
-Answer_Data Get_Answer_Data()
+static bool packetCommunication(eCOMMAND_t comm)
 {
-  return *(Answer_Data*)cmdReply.Payload;
+	bool ret = true;
+
+	/* set the Request Payload byte to 0x2 to start Measurement in continuous mode */
+	if(comm == eCOMMAND_MEAS) sNevadaNanoHandler.Meas.measurement_mode = eMEASUREMENT_MODE_CONT;
+
+	setRequestPacket(comm);
+
+	switch(comm)
+	{
+	case eCOMMAND_STATUS : {
+		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST, 1000) != HAL_OK )
+		{
+			ret = false;
+		}
+
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY, 2000) == HAL_OK )
+		{
+			if(setReplyPacket() == false) ret = false;
+		}
+		else
+		{
+			ret = false;
+		}
+	} break;
+
+	case eCOMMAND_MEAS : {
+		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST, 1000) != HAL_OK )
+		{
+			ret = false;
+		}
+
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY, 2000) == HAL_OK )
+		{
+			if(setReplyPacket() == false) ret = false;
+		}
+		else
+		{
+			ret = false;
+		}
+	} break;
+
+	case eCOMMAND_ANSWER : {
+		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST, 1000) != HAL_OK )
+		{
+			ret = false;
+		}
+
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY, 2000) == HAL_OK )
+		{
+			if(setReplyPacket() == false) ret = false;
+		}
+		else
+		{
+			ret = false;
+		}
+	} break;
+
+	default : ret = false; break;
+	}
+
+	return ret;
+}
+
+
+static bool setRequestPacket(eCOMMAND_t comm)
+{
+	bool ret = true;
+
+	sNevadaNanoHandler.Comm = comm;
+
+	memset(&sNevadaNanoHandler.RequestPacket, 0, sizeof(sREPLY_PACKET_t));
+
+	if(comm == eCOMMAND_MEAS)
+	{
+		sNevadaNanoHandler.RequestPacket.PacketHeader.CmdID  = eCOMMAND_MEAS;
+		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = ePAYLOAD_LENGTH_MEAS_REQUEST;
+		sNevadaNanoHandler.RequestPacket.measurement 		 = sNevadaNanoHandler.Meas;
+	}
+	else
+	{
+		sNevadaNanoHandler.RequestPacket.PacketHeader.CmdID  = comm;
+		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = ePAYLOAD_LENGTH_ZERO;
+	}
+
+	sNevadaNanoHandler.RequestPacket.PacketHeader.Reserved = RESERVED;
+	sNevadaNanoHandler.RequestPacket.PacketHeader.Checksum = crc_generate( (uint8_t *) &sNevadaNanoHandler.RequestPacket,
+																			sizeof(sREQUEST_PACKET_HEADER_t) + sNevadaNanoHandler.RequestPacket.PacketHeader.Length,
+																			CRC_START_VALUE );
+
+	return ret;
+}
+
+
+static bool setReplyPacket()
+{
+	bool ret = true;
+
+	sREPLY_PACKET_t tempReplyPacket = {0, };
+
+	switch(sNevadaNanoHandler.Comm)
+	{
+	case eCOMMAND_STATUS : {
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY );
+	} break;
+
+	case eCOMMAND_MEAS : {
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY );
+	} break;
+
+	case eCOMMAND_ANSWER : {
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY );
+	} break;
+
+	default : break;
+	}
+
+	if( checkCRC( (uint8_t*)&tempReplyPacket, sNevadaNanoHandler.Comm ) != true ) 	ret = false;
+	if( sNevadaNanoHandler.Comm != (eCOMMAND_t)tempReplyPacket.PacketHeader.CmdID ) ret = false;
+	if( (eSTATUS_t)tempReplyPacket.PacketHeader.Status != eSTATUS_OK )  			ret = false;
+
+	sNevadaNanoHandler.Stat = (eSTATUS_t)tempReplyPacket.PacketHeader.Status;
+	sNevadaNanoHandler.ReplyPacket = tempReplyPacket;
+
+	return ret;
+}
+
+bool checkCRC(uint8_t *buffer, eCOMMAND_t comm)
+{
+	bool ret = true;
+	sREPLY_PACKET_t * bufptr = (sREPLY_PACKET_t*)buffer;
+
+	uint16_t receivedCRC = bufptr->PacketHeader.Checksum;
+	uint16_t tempCRC 	 = 0;
+
+	bufptr->PacketHeader.Checksum = 0;
+
+	switch(sNevadaNanoHandler.Comm)
+	{
+	case eCOMMAND_STATUS : {
+		tempCRC = crc_generate( (uint8_t*)bufptr,
+								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY,
+								CRC_START_VALUE );
+	} break;
+
+	case eCOMMAND_MEAS : {
+		tempCRC = crc_generate( (uint8_t*)bufptr,
+								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY,
+								CRC_START_VALUE );
+	} break;
+
+	case eCOMMAND_ANSWER : {
+		tempCRC = crc_generate( (uint8_t*)bufptr,
+								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY,
+								CRC_START_VALUE );
+	} break;
+
+	default : break;
+	}
+
+	if(receivedCRC != tempCRC) ret = false;
+	else bufptr->PacketHeader.Checksum = receivedCRC;
+
+	return ret;
 }
 
 
@@ -142,38 +264,17 @@ uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue)
   0x7c26, 0x6c07, 0x5c64, 0x4c45, 0x3ca2, 0x2c83, 0x1ce0, 0x0cc1,
   0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8,
   0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0,};
-  
+
   uint16_t crc;
   uint8_t *p;
   int ii;
   crc = startValue;
-  
-  for(p = buffer, ii = 0; ii < length; ii++) 
+
+  for(p = buffer, ii = 0; ii < length; ii++)
   {
     crc = (crc << 8) ^ crc_table[(crc >> 8) ^ *p];
     p++;
   }
-  
+
   return crc;
-}
-
-
-static void MX_USART3_UART_Init(void)
-{
-
-  huart3.Instance = USART3;
-  huart3.Init.BaudRate = 38400;
-  huart3.Init.WordLength = UART_WORDLENGTH_8B;
-  huart3.Init.StopBits = UART_STOPBITS_1;
-  huart3.Init.Parity = UART_PARITY_NONE;
-  huart3.Init.Mode = UART_MODE_TX_RX;
-  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
 }
