@@ -9,13 +9,13 @@
  *  1. After powering on the sensor, wait 3 seconds for the sensor to boot
  *  2. Read MPS Status (Read Register: 0x41)
  *  3. if the Status is OK, Read MPS Version Info (Read Register: 0x42)
- *  4. Start measurement in ?占폺ontinuous??mode (Write Register: 0x61, Value: 0x2)
+ *  4. Start measurement in ?�continuous??mode (Write Register: 0x61, Value: 0x2)
  *  5. Wait 2 seconds and Get Answer (Read Register: 0x01)
  *  6. repeat
  *
  *  Note
  *  1. the sensor initializes for the first 10 cycles after powering up.
- *  2. Little Endian format (LSB first)
+ *	2. Little Endian format (LSB first)
  *
  */
 
@@ -24,10 +24,10 @@
 
 #include "main.h"
 
-#define NEVADANANO_UART_RAUD_RATE	38400
-#define NEVADANANO_UART_DATA_SIZE	UART_WORDLENGTH_8B
-#define NEVADANANO_UART_PARITY		UART_PARITY_NONE
-#define NEVADANANO_UART_STOP_BIT	UART_STOPBITS_1
+#define NEVADANANO_UART_RAUD_RATE			38400
+#define NEVADANANO_UART_DATA_SIZE			UART_WORDLENGTH_8B
+#define NEVADANANO_UART_PARITY				UART_PARITY_NONE
+#define NEVADANANO_UART_STOP_BIT			UART_STOPBITS_1
 
 //#define READ_MPS_INFO
 
@@ -142,27 +142,6 @@ typedef enum {
 } eGAS_ID_t;
 
 
-#ifdef READ_MPS_INFO
-typedef struct __attribute__((packed)) {
-	uint8_t SW_Version_W;
-	uint8_t SW_Version_X;
-	uint8_t SW_Version_Y;
-	uint8_t SW_Version_Z;
-	uint8_t HW_Version_W;
-	uint8_t HW_Version_X;
-	uint8_t Protocol_Version_W;
-	uint8_t Protocol_Version_X;
-} sVERSION_t;
-
-typedef struct __attribute__((packed)) {
-	char SERIAL_NUM[32];
-	uint32_t SENSOR_TYPE; 	// ?占폦PS Flammable Gas Sensor??sensor type = 0x03
-	char CAL_DATE[16]; 		// Date of last calibration, MM/DD/YYYY
-	char MFG_DATE[16]; 		// Date of manufacture,      MM/DD/YYYY
-} sSENSOR_INFO_t;
-#endif
-
-
 typedef struct __attribute__((packed)) {
 	uint16_t CmdID;
 	uint16_t Length;
@@ -231,6 +210,27 @@ typedef struct {
 	sREPLY_PACKET_t   ReplyPacket;
 
 } sNEVADANANO_HANDLER_t;
+
+
+#ifdef READ_MPS_INFO
+typedef struct __attribute__((packed)) {
+	uint8_t SW_Version_W;
+	uint8_t SW_Version_X;
+	uint8_t SW_Version_Y;
+	uint8_t SW_Version_Z;
+	uint8_t HW_Version_W;
+	uint8_t HW_Version_X;
+	uint8_t Protocol_Version_W;
+	uint8_t Protocol_Version_X;
+} sVERSION_t;
+
+typedef struct __attribute__((packed)) {
+	char SERIAL_NUM[32];
+	uint32_t SENSOR_TYPE; 	// ?�MPS Flammable Gas Sensor??sensor type = 0x03
+	char CAL_DATE[16]; 		// Date of last calibration, MM/DD/YYYY
+	char MFG_DATE[16]; 		// Date of manufacture,      MM/DD/YYYY
+} sSENSOR_INFO_t;
+#endif
 
 
 bool initSensor(void);
