@@ -15,7 +15,7 @@
  *
  *  Note
  *  1. the sensor initializes for the first 10 cycles after powering up.
- *	2. Little Endian format (LSB first)
+ *  2. Little Endian format (LSB first)
  *
  */
 
