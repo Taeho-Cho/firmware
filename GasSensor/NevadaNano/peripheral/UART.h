@@ -20,7 +20,7 @@
 #define UART1_USE_INT 	0
 #define UART2_USE_INT 	0
 #define UART3_USE_INT 	0
-#define UART4_USE_INT 	0 // 1
+#define UART4_USE_INT 	0
 #define UART5_USE_INT 	0
 
 
