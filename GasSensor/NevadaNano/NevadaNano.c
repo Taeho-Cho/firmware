@@ -25,7 +25,6 @@ bool initSensor(void)
 {
 	bool ret = true;
 
-	MX_DMA_Init();
 	MX_UART4_Init();
 
 	HAL_Delay(3000);
