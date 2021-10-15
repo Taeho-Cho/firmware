@@ -6,8 +6,25 @@
  */
 
 #include "NevadaNano.h"
-#include "usart.h"
 
+/*
+ *  0 - not use
+ *  1 -     use
+ */
+#define USE_USER_DEFINED_UART 1
+
+#if USE_USER_DEFINED_UART
+	#include "UART.h"
+
+	#define UART_BAUD_RATE			38400
+	#define UART_CHANNEL 			eUART_CHANNEL_4
+	#define UART_INIT(baudrate) 	UART_init(UART_CHANNEL, baudrate)
+	#define UART_SEND(pData, Size) 	UART_send(UART_CHANNEL, pData, Size)
+	#define UART_READ(pData, Size) 	UART_read(UART_CHANNEL, pData, Size)
+
+#else
+	#include "usart.h"
+#endif
 
 static uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue);
 static bool packetCommunication(eCOMMAND_t);
@@ -25,7 +42,11 @@ bool initSensor(void)
 {
 	bool ret = true;
 
+#if USE_USER_DEFINED_UART
+	UART_INIT(UART_BAUD_RATE);
+#else
 	MX_UART4_Init();
+#endif
 
 	HAL_Delay(3000);
 
@@ -70,55 +91,87 @@ static bool packetCommunication(eCOMMAND_t comm)
 
 	switch(comm)
 	{
+
 	case eCOMMAND_STATUS : {
+
+#if USE_USER_DEFINED_UART
+		if( UART_SEND( (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST) != true )
+#else
 		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST, 1000) != HAL_OK )
+#endif
 		{
 			ret = false;
 		}
 
-		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY, 2000) == HAL_OK )
-		{
-			if(setReplyPacket() == false) ret = false;
-		}
-		else
+#if USE_USER_DEFINED_UART
+		if( UART_READ( RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY) != true )
+#else
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY, 2000) != HAL_OK )
+#endif
 		{
 			ret = false;
 		}
+		else
+		{
+			if(setReplyPacket() == false) ret = false;
+		}
 	} break;
+
 
 	case eCOMMAND_MEAS : {
+
+#if USE_USER_DEFINED_UART
+		if( UART_SEND( (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST ) != true )
+#else
 		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST, 1000) != HAL_OK )
+#endif
 		{
 			ret = false;
 		}
 
-		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY, 2000) == HAL_OK )
-		{
-			if(setReplyPacket() == false) ret = false;
-		}
-		else
+#if USE_USER_DEFINED_UART
+		if( UART_READ( RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY ) != true )
+#else
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY, 2000) != HAL_OK )
+#endif
 		{
 			ret = false;
 		}
+		else
+		{
+			if(setReplyPacket() == false) ret = false;
+		}
 	} break;
+
 
 	case eCOMMAND_ANSWER : {
+
+#if USE_USER_DEFINED_UART
+		if( UART_SEND( (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST ) != true )
+#else
 		if( HAL_UART_Transmit(&huart4, (uint8_t *) &sNevadaNanoHandler.RequestPacket, sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST, 1000) != HAL_OK )
+#endif
 		{
 			ret = false;
 		}
 
-		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY, 2000) == HAL_OK )
+#if USE_USER_DEFINED_UART
+		if( UART_READ( RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY ) != true )
+#else
+		if( HAL_UART_Receive(&huart4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY, 2000) != HAL_OK )
+#endif
 		{
-			if(setReplyPacket() == false) ret = false;
+			ret = false;
 		}
 		else
 		{
-			ret = false;
+			if(setReplyPacket() == false) ret = false;
 		}
 	} break;
 
+
 	default : ret = false; break;
+
 	}
 
 	return ret;
@@ -276,4 +329,3 @@ uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue)
 
   return crc;
 }
-
