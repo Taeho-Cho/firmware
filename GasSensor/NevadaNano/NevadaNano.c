@@ -36,7 +36,6 @@ static uint8_t RX_BUFFER[RX_BUFFERFER_SIZE];
 bool initSensor(void)
 {
 	bool ret = true;
-	uint32_t index = 0;
 
 	HAL_Delay(3000);
 
@@ -47,6 +46,8 @@ bool initSensor(void)
 	sendPacket(eCOMMAND_STATUS);
 
 #if RX_INTERRUPT_MODE
+	
+	uint32_t index = 0;
 
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
@@ -66,12 +67,13 @@ bool initSensor(void)
 bool startMeasurement(void)
 {
 	bool ret = true;
-	uint32_t index = 0;
 
 	sendPacket(eCOMMAND_MEAS);
 
 #if RX_INTERRUPT_MODE
 
+	uint32_t index = 0;
+	
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
 		if(receivePacket(eCOMMAND_MEAS) == true) break;
@@ -92,7 +94,6 @@ bool startMeasurement(void)
 bool getAnswer(void)
 {
 	bool ret = true;
-	uint32_t index = 0;
 
 	HAL_Delay(1000);
 
@@ -100,6 +101,8 @@ bool getAnswer(void)
 
 #if RX_INTERRUPT_MODE
 
+	uint32_t index = 0;
+	
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
 		if(receivePacket(eCOMMAND_ANSWER) == true) break;
