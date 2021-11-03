@@ -173,6 +173,7 @@ typedef struct{
 void initLCD();
 bool writeLCD(uint8_t xPosition, uint8_t yPosition, char *data, uint8_t size);
 
+
 void ClearDisplay();
 void ReturnHome();
 void EntryModeSet(uint8_t ID, uint8_t S);
