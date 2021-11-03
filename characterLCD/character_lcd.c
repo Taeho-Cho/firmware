@@ -12,31 +12,6 @@ static void DataEnable(); /* refer to the Timing Diagram in the datasheet */
 static sLCD_HANDLER_t hLCD;
 
 
-#if 0
-static sLCD_IO_t hLCD =
-{
-		{LCD_RS_GPIO_Port, LCD_RS_Pin},
-#if _USE_LCD_RW_
-		{LCD_RW_GPIO_Port, LCD_RW_Pin},
-#endif /* _USE_LCD_RW_ */
-		{LCD_E_GPIO_Port, LCD_E_Pin},
-
-#if _USE_4_BIT_MODE_
-
-#else
-		{LCD_D0_GPIO_Port, LCD_D0_Pin},
-		{LCD_D1_GPIO_Port, LCD_D1_Pin},
-		{LCD_D2_GPIO_Port, LCD_D2_Pin},
-		{LCD_D3_GPIO_Port, LCD_D3_Pin},
-#endif /* _USE_4_BIT_MODE_ */
-
-		{LCD_D4_GPIO_Port, LCD_D4_Pin},
-		{LCD_D5_GPIO_Port, LCD_D5_Pin},
-		{LCD_D6_GPIO_Port, LCD_D6_Pin},
-		{LCD_D7_GPIO_Port, LCD_D7_Pin}
-};
-#endif
-
 void initLCD()
 {
 	usDelayInit();
