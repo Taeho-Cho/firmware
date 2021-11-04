@@ -35,7 +35,7 @@
 #include "GPIO_wrapper.h"
 
 #define _USE_LCD_RW_PIN_	0
-#define _USE_4_BIT_MODE_ 	0
+#define _USE_4_BIT_MODE_ 	1
 
 
 /* LCD IO pin settings begin */
@@ -126,7 +126,9 @@
 #define NUMBER_OF_CHAR_IN_LINE  16
 #define X_POSITION_MAX			0xF
 #define SECOND_LINE_OFFSET 		0x40
-#define US_DELAY_TIME			700
+
+#define ENABLE_CYCLE_DELAY		600
+
 
 
 typedef struct{
