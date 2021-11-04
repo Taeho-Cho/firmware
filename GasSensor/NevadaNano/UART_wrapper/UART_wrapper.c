@@ -5,9 +5,9 @@
  *      Author: chotaeho
  */
 
-#include "UART.h"
-#include "usart.h"
 #include "ringbuffer.h"
+#include "UART_wrapper.h"
+#include "usart.h"
 
 #define	TX_TIMEOUT	1000
 #define RX_TIMEOUT	2000
