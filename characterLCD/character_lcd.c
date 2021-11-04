@@ -26,25 +26,25 @@ void initLCD()
 	hLCD.IO.E.pin  = LCD_E_Pin;
 
 #if _USE_4_BIT_MODE_
-
+	/* only use DB4 ~ DB7 */
 #else
-	hLCD.IO.DB0.port = LCD_D0_GPIO_Port;
-	hLCD.IO.DB0.pin  = LCD_D0_Pin;
-	hLCD.IO.DB1.port = LCD_D1_GPIO_Port;
-	hLCD.IO.DB1.pin  = LCD_D1_Pin;
-	hLCD.IO.DB2.port = LCD_D2_GPIO_Port;
-	hLCD.IO.DB2.pin  = LCD_D2_Pin;
-	hLCD.IO.DB3.port = LCD_D3_GPIO_Port;
-	hLCD.IO.DB3.pin  = LCD_D3_Pin;
+	hLCD.IO.DB0.port = LCD_DB0_GPIO_Port;
+	hLCD.IO.DB0.pin  = LCD_DB0_Pin;
+	hLCD.IO.DB1.port = LCD_DB1_GPIO_Port;
+	hLCD.IO.DB1.pin  = LCD_DB1_Pin;
+	hLCD.IO.DB2.port = LCD_DB2_GPIO_Port;
+	hLCD.IO.DB2.pin  = LCD_DB2_Pin;
+	hLCD.IO.DB3.port = LCD_DB3_GPIO_Port;
+	hLCD.IO.DB3.pin  = LCD_DB3_Pin;
 #endif /* _USE_4_BIT_MODE_ */
-	hLCD.IO.DB4.port = LCD_D4_GPIO_Port;
-	hLCD.IO.DB4.pin  = LCD_D4_Pin;
-	hLCD.IO.DB5.port = LCD_D5_GPIO_Port;
-	hLCD.IO.DB5.pin  = LCD_D5_Pin;
-	hLCD.IO.DB6.port = LCD_D6_GPIO_Port;
-	hLCD.IO.DB6.pin  = LCD_D6_Pin;
-	hLCD.IO.DB7.port = LCD_D7_GPIO_Port;
-	hLCD.IO.DB7.pin  = LCD_D7_Pin;
+	hLCD.IO.DB4.port = LCD_DB4_GPIO_Port;
+	hLCD.IO.DB4.pin  = LCD_DB4_Pin;
+	hLCD.IO.DB5.port = LCD_DB5_GPIO_Port;
+	hLCD.IO.DB5.pin  = LCD_DB5_Pin;
+	hLCD.IO.DB6.port = LCD_DB6_GPIO_Port;
+	hLCD.IO.DB6.pin  = LCD_DB6_Pin;
+	hLCD.IO.DB7.port = LCD_DB7_GPIO_Port;
+	hLCD.IO.DB7.pin  = LCD_DB7_Pin;
 
 	memset(hLCD.data.line1, 0, NUMBER_OF_CHAR_IN_LINE);
 	memset(hLCD.data.line2, 0, NUMBER_OF_CHAR_IN_LINE);
@@ -55,7 +55,11 @@ void initLCD()
 	HAL_Delay(50);
 
 	/* 2-line display setting */
+#if _USE_4_BIT_MODE_
+	/* only use DB4 ~ DB7 */
+#else
 	FunctionSet(1,1,0);
+#endif /* _USE_4_BIT_MODE_ */
 
 	/* display on */
 	DisplayOnOff(1,1,1);
@@ -105,25 +109,19 @@ bool writeLCD(uint8_t xPosition, uint8_t yPosition, char *data, uint8_t size)
 		memcpy(&hLCD.data.line2[xPosition], data, size);
 	}
 
-	ClearDisplay();
+	ClearDisplay(); /* clear the LCD and set the AC to 0x00 */
 	for(uint8_t i = 0; i < NUMBER_OF_CHAR_IN_LINE; i++)
 	{
 		if(hLCD.data.line1[i] == 0) WriteDataToRAM(' ');
 		else 						WriteDataToRAM(hLCD.data.line1[i]);
 	}
 
-	SetDDRAMaddress(SECOND_LINE_OFFSET);
+	SetDDRAMaddress(SECOND_LINE_OFFSET); /* set the AC to 0x40 */
 	for(uint8_t i = 0; i < NUMBER_OF_CHAR_IN_LINE; i++)
 	{
 		if(hLCD.data.line2[i] == 0) WriteDataToRAM(' ');
 		else 						WriteDataToRAM(hLCD.data.line2[i]);
 	}
-
-	/* set DDRAM address */
-	//SetDDRAMaddress(xPosition + (yPosition * SECOND_LINE_OFFSET));
-
-	/* write data to RAM */
-	//for(uint8_t i = 0; i < size; i++)  WriteDataToRAM(data[i]);
 
 	return ret;
 }

@@ -39,32 +39,32 @@
 
 
 /* LCD IO pin settings begin */
-#ifndef LCD_D4_Pin
-	#define LCD_D4_Pin GPIO_PIN_10
+#ifndef LCD_DB4_Pin
+	#define LCD_DB4_Pin GPIO_PIN_10
 #endif
-#ifndef LCD_D4_GPIO_Port
-	#define LCD_D4_GPIO_Port GPIOB
-#endif
-
-#ifndef LCD_D5_Pin
-	#define LCD_D5_Pin GPIO_PIN_11
-#endif
-#ifndef LCD_D5_GPIO_Port
-	#define LCD_D5_GPIO_Port GPIOB
+#ifndef LCD_DB4_GPIO_Port
+	#define LCD_DB4_GPIO_Port GPIOB
 #endif
 
-#ifndef LCD_D6_Pin
-	#define LCD_D6_Pin GPIO_PIN_12
+#ifndef LCD_DB5_Pin
+	#define LCD_DB5_Pin GPIO_PIN_11
 #endif
-#ifndef LCD_D6_GPIO_Port
-	#define LCD_D6_GPIO_Port GPIOB
+#ifndef LCD_DB5_GPIO_Port
+	#define LCD_DB5_GPIO_Port GPIOB
 #endif
 
-#ifndef LCD_D7_Pin
-	#define LCD_D7_Pin GPIO_PIN_13
+#ifndef LCD_DB6_Pin
+	#define LCD_DB6_Pin GPIO_PIN_12
 #endif
-#ifndef LCD_D7_GPIO_Port
-	#define LCD_D7_GPIO_Port GPIOB
+#ifndef LCD_DB6_GPIO_Port
+	#define LCD_DB6_GPIO_Port GPIOB
+#endif
+
+#ifndef LCD_DB7_Pin
+	#define LCD_DB7_Pin GPIO_PIN_13
+#endif
+#ifndef LCD_DB7_GPIO_Port
+	#define LCD_DB7_GPIO_Port GPIOB
 #endif
 
 #ifndef LCD_E_Pin
@@ -91,34 +91,34 @@
 #endif /* _USE_LCD_RW_PIN_ */
 
 #if _USE_4_BIT_MODE_
-
+	/* only use DB4 ~ DB7 */
 #else
-#ifndef LCD_D0_Pin
-	#define LCD_D0_Pin GPIO_PIN_6
+#ifndef LCD_DB0_Pin
+	#define LCD_DB0_Pin GPIO_PIN_6
 #endif
-#ifndef LCD_D0_GPIO_Port
-	#define LCD_D0_GPIO_Port GPIOB
-#endif
-
-#ifndef LCD_D1_Pin
-	#define LCD_D1_Pin GPIO_PIN_7
-#endif
-#ifndef LCD_D1_GPIO_Port
-	#define LCD_D1_GPIO_Port GPIOB
+#ifndef LCD_DB0_GPIO_Port
+	#define LCD_DB0_GPIO_Port GPIOB
 #endif
 
-#ifndef LCD_D2_Pin
-	#define LCD_D2_Pin GPIO_PIN_8
+#ifndef LCD_DB1_Pin
+	#define LCD_DB1_Pin GPIO_PIN_7
 #endif
-#ifndef LCD_D2_GPIO_Port
-	#define LCD_D2_GPIO_Port GPIOB
+#ifndef LCD_DB1_GPIO_Port
+	#define LCD_DB1_GPIO_Port GPIOB
 #endif
 
-#ifndef LCD_D3_Pin
-	#define LCD_D3_Pin GPIO_PIN_9
+#ifndef LCD_DB2_Pin
+	#define LCD_DB2_Pin GPIO_PIN_8
 #endif
-#ifndef LCD_D3_GPIO_Port
-	#define LCD_D3_GPIO_Port GPIOB
+#ifndef LCD_DB2_GPIO_Port
+	#define LCD_DB2_GPIO_Port GPIOB
+#endif
+
+#ifndef LCD_DB3_Pin
+	#define LCD_DB3_Pin GPIO_PIN_9
+#endif
+#ifndef LCD_DB3_GPIO_Port
+	#define LCD_DB3_GPIO_Port GPIOB
 #endif
 #endif /* _USE_4_BIT_MODE_ */
 /* LCD IO pin settings end */
@@ -138,10 +138,14 @@ typedef struct{
 	sGPIO_t E;
 
 	/* Data Bus */
+#if _USE_4_BIT_MODE_
+	/* only use DB4 ~ DB7 */
+#else
 	sGPIO_t DB0;
 	sGPIO_t DB1;
 	sGPIO_t DB2;
 	sGPIO_t DB3;
+#endif /* _USE_4_BIT_MODE_ */
 	sGPIO_t DB4;
 	sGPIO_t DB5;
 	sGPIO_t DB6;
