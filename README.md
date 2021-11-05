@@ -6,7 +6,7 @@
 ![GasSensorsch](https://user-images.githubusercontent.com/57129682/140460841-024fd175-b948-4580-989b-731239a00f9b.png)
 - GasSensor_RX, GasSensor_RX signals are the MCU's UART signals.
 
-
+---
 
 ### 2. Character LCD schematic
 
