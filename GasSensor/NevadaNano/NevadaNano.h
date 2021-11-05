@@ -35,48 +35,6 @@
 
 
 typedef enum {
-	ePAYLOAD_LENGTH_ZERO = 0,
-
-	ePAYLOAD_LENGTH_ANSWER_REQUEST = 0,
-	ePAYLOAD_LENGTH_ANSWER_REPLY   = 28,
-
-	ePAYLOAD_LENGTH_CONC_REQUEST = 0,
-	ePAYLOAD_LENGTH_CONC_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_ID_REQUEST = 0,
-	ePAYLOAD_LENGTH_ID_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_TEMP_REQUEST = 0,
-	ePAYLOAD_LENGTH_TEMP_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_PRES_REQUEST = 0,
-	ePAYLOAD_LENGTH_PRES_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_REL_HUM_REQUEST = 0,
-	ePAYLOAD_LENGTH_REL_HUM_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_ABS_HUM_REQUEST = 0,
-	ePAYLOAD_LENGTH_ABS_HUM_REPLY   = 4,
-
-	ePAYLOAD_LENGTH_STATUS_REQUEST = 0,
-	ePAYLOAD_LENGTH_STATUS_REPLY   = 1,
-
-	ePAYLOAD_LENGTH_VERSION_REQUEST = 0,
-	ePAYLOAD_LENGTH_VERSION_REPLY   = 8,
-
-	ePAYLOAD_LENGTH_SENSOR_INFO_REQUEST = 0,
-	ePAYLOAD_LENGTH_SENSOR_INFO_REPLY   = 68,
-
-	ePAYLOAD_LENGTH_MEAS_REQUEST = 1,
-	ePAYLOAD_LENGTH_MEAS_REPLY   = 0,
-
-	ePAYLOAD_LENGTH_SHUT_DOWN_REQUEST = 0,
-	ePAYLOAD_LENGTH_SHUT_DOWN_REPLY   = 0,
-
-} ePAYLOAD_LENGTH_t;
-
-
-typedef enum {
 	eSTATUS_OK 							= 0x00,
 	eSTATUS_CRC_FAILED 					= 0x01,
 	eSTATUS_BAD_PARAM 					= 0x02,
@@ -148,21 +106,12 @@ typedef struct __attribute__((packed)) {
 typedef union {
 	struct
 	{
-		uint8_t   measurement_mode :4;
-		uint8_t concentration_unit :4;
+		uint8_t   measurement_mode :4; 	/*!< This parameter can be a value of @ref MEASUREMENT_MODE */
+
+		uint8_t concentration_unit :4; 	/*!< This parameter can be a value of @ref CONCENTRATION_UNIT */
 	};
 	uint8_t value;
 } uMEASUREMENT_t;
-
-typedef enum {
-	eMEASUREMENT_MODE_CONT = 0x2,
-	eMEASUREMENT_MODE_STOP = 0x3
-} eMEASUREMENT_MODE_t;
-
-typedef enum {
-	eCONCENTRATION_UNIT_ISO = 0x0,
-	eCONCENTRATION_UNIT_IEC = 0x2
-} eCONCENTRATION_UNIT_t;
 
 
 typedef struct __attribute__((packed)) {
@@ -198,9 +147,8 @@ typedef struct __attribute__((packed)) {
 
 
 typedef struct {
-	eCOMMAND_t		Comm; // from the request packet
-	eSTATUS_t 		Stat; // from the reply packet
-	uMEASUREMENT_t 	Meas; // to set the request packet
+	eCOMMAND_t		Comm; 	/*!< from the request packet */
+	eSTATUS_t 		Stat; 	/*!< from the   reply packet */
 
 	sREQUEST_PACKET_t RequestPacket;
 	sREPLY_PACKET_t   ReplyPacket;
@@ -227,6 +175,74 @@ typedef struct __attribute__((packed)) {
 	char MFG_DATE[16]; 		// Date of manufacture,      MM/DD/YYYY
 } sSENSOR_INFO_t;
 #endif
+
+
+/*
+ * @defgroup  MEASUREMENT_MODE
+ * @{
+ */
+#define MEASUREMENT_MODE_CONT 	0x2U 	/*!< continuous mode  */
+#define MEASUREMENT_MODE_STOP 	0x3U 	/*!< stop measurement */
+/*
+ * @}
+ */
+
+
+/*
+ * @defgroup  CONCENTRATION_UNIT
+ * @{
+ */
+#define CONCENTRATION_UNIT_ISO 	0x0U 	/*!< ISO 10156  	*/
+#define CONCENTRATION_UNIT_IEC 	0x2U 	/*!< IEC 60079-20-1 */
+/*
+ * @}
+ */
+
+
+/*
+ * @defgroup PAYLOAD_LENGTH
+ * @{
+ */
+#define PAYLOAD_LENGTH_ZERO  0
+
+#define PAYLOAD_LENGTH_ANSWER_REQUEST  0
+#define PAYLOAD_LENGTH_ANSWER_REPLY    28U
+
+#define PAYLOAD_LENGTH_CONC_REQUEST  0
+#define PAYLOAD_LENGTH_CONC_REPLY    4U
+
+#define PAYLOAD_LENGTH_ID_REQUEST  0
+#define PAYLOAD_LENGTH_ID_REPLY    4U
+
+#define PAYLOAD_LENGTH_TEMP_REQUEST  0
+#define PAYLOAD_LENGTH_TEMP_REPLY    4U
+
+#define PAYLOAD_LENGTH_PRES_REQUEST  0
+#define PAYLOAD_LENGTH_PRES_REPLY    4U
+
+#define PAYLOAD_LENGTH_REL_HUM_REQUEST  0
+#define PAYLOAD_LENGTH_REL_HUM_REPLY    4U
+
+#define PAYLOAD_LENGTH_ABS_HUM_REQUEST  0
+#define PAYLOAD_LENGTH_ABS_HUM_REPLY    4U
+
+#define PAYLOAD_LENGTH_STATUS_REQUEST  0
+#define PAYLOAD_LENGTH_STATUS_REPLY    1U
+
+#define PAYLOAD_LENGTH_VERSION_REQUEST  0
+#define PAYLOAD_LENGTH_VERSION_REPLY    8U
+
+#define PAYLOAD_LENGTH_SENSOR_INFO_REQUEST  0
+#define PAYLOAD_LENGTH_SENSOR_INFO_REPLY    68U
+
+#define PAYLOAD_LENGTH_MEAS_REQUEST  1U
+#define PAYLOAD_LENGTH_MEAS_REPLY    0
+
+#define PAYLOAD_LENGTH_SHUT_DOWN_REQUEST  0
+#define PAYLOAD_LENGTH_SHUT_DOWN_REPLY    0
+/*
+ * @}
+ */
 
 
 bool initSensor(void);

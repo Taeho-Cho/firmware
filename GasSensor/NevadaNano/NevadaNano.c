@@ -119,9 +119,6 @@ static bool sendPacket(eCOMMAND_t comm)
 {
 	bool ret = true;
 
-	/* set the Request Payload byte to 0x2 to start Measurement in continuous mode */
-	if(comm == eCOMMAND_MEAS) sNevadaNanoHandler.Meas.measurement_mode = eMEASUREMENT_MODE_CONT;
-
 	setRequestPacket(comm);
 
 	switch (comm) {
@@ -130,7 +127,7 @@ static bool sendPacket(eCOMMAND_t comm)
 
 #if RX_INTERRUPT_MODE
 		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST) != true)
+						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REQUEST) != true)
 #else
 		if(HAL_UART_Transmit(&huart4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
 							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST, TX_TIMEOUT) != HAL_OK)
@@ -145,7 +142,7 @@ static bool sendPacket(eCOMMAND_t comm)
 
 #if RX_INTERRUPT_MODE
 		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST) != true)
+						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REQUEST) != true)
 #else
 		if(HAL_UART_Transmit(&huart4, (uint8_t *)&sNevadaNanoHandler.RequestPacket,
 							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST, TX_TIMEOUT) != HAL_OK)
@@ -160,7 +157,7 @@ static bool sendPacket(eCOMMAND_t comm)
 
 #if RX_INTERRUPT_MODE
 		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST) != true)
+						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REQUEST) != true)
 #else
 		if(HAL_UART_Transmit(&huart4, (uint8_t *)&sNevadaNanoHandler.RequestPacket,
 							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST, TX_TIMEOUT) != HAL_OK)
@@ -187,7 +184,7 @@ static bool receivePacket(eCOMMAND_t comm)
 	case eCOMMAND_STATUS: {
 
 #if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY) != true)
+		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REPLY) != true)
 #else
 		if(HAL_UART_Receive(&huart4, RX_BUFFER,
 							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY, RX_TIMEOUT) != HAL_OK)
@@ -201,7 +198,7 @@ static bool receivePacket(eCOMMAND_t comm)
 	case eCOMMAND_MEAS: {
 
 #if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY) != true)
+		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REPLY) != true)
 #else
 		if(HAL_UART_Receive(&huart4, RX_BUFFER,
 							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY, RX_TIMEOUT) != HAL_OK)
@@ -215,7 +212,7 @@ static bool receivePacket(eCOMMAND_t comm)
 	case eCOMMAND_ANSWER: {
 
 #if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY) != true)
+		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REPLY) != true)
 #else
 		if(HAL_UART_Receive(&huart4, RX_BUFFER,
 							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY, RX_TIMEOUT) != HAL_OK)
@@ -248,13 +245,15 @@ static bool setRequestPacket(eCOMMAND_t comm)
 	if(comm == eCOMMAND_MEAS)
 	{
 		sNevadaNanoHandler.RequestPacket.PacketHeader.CmdID  = eCOMMAND_MEAS;
-		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = ePAYLOAD_LENGTH_MEAS_REQUEST;
-		sNevadaNanoHandler.RequestPacket.measurement 		 = sNevadaNanoHandler.Meas;
+
+		/* set the Request Payload byte to 0x2 to start Measurement in continuous mode */
+		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = PAYLOAD_LENGTH_MEAS_REQUEST;
+		sNevadaNanoHandler.RequestPacket.measurement.measurement_mode = MEASUREMENT_MODE_CONT;
 	}
 	else
 	{
 		sNevadaNanoHandler.RequestPacket.PacketHeader.CmdID  = comm;
-		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = ePAYLOAD_LENGTH_ZERO;
+		sNevadaNanoHandler.RequestPacket.PacketHeader.Length = PAYLOAD_LENGTH_ZERO;
 	}
 
 	sNevadaNanoHandler.RequestPacket.PacketHeader.Reserved = RESERVED;
@@ -275,15 +274,15 @@ static bool setReplyPacket(eCOMMAND_t comm)
 	switch(comm)
 	{
 	case eCOMMAND_STATUS : {
-		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY );
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REPLY );
 	} break;
 
 	case eCOMMAND_MEAS : {
-		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY );
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REPLY );
 	} break;
 
 	case eCOMMAND_ANSWER : {
-		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY );
+		memcpy( &tempReplyPacket, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REPLY );
 	} break;
 
 	default : break;
@@ -316,19 +315,19 @@ bool checkCRC(uint8_t *buffer, eCOMMAND_t comm)
 	{
 	case eCOMMAND_STATUS : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY,
+								sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REPLY,
 								CRC_START_VALUE );
 	} break;
 
 	case eCOMMAND_MEAS : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY,
+								sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REPLY,
 								CRC_START_VALUE );
 	} break;
 
 	case eCOMMAND_ANSWER : {
 		tempCRC = crc_generate( (uint8_t*)bufptr,
-								sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY,
+								sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REPLY,
 								CRC_START_VALUE );
 	} break;
 
