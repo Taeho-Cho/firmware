@@ -7,3 +7,9 @@
 ### 2. Electrical Characteristics
 
 ![electrical](https://user-images.githubusercontent.com/57129682/140594025-c9ceb74f-5ec3-4249-bd2d-f71456582de2.png)
+
+<br />
+
+### 3. UART Communication
+
+![uart](https://user-images.githubusercontent.com/57129682/140594381-120b2a73-1ce8-4312-9452-b5b44ebef306.png)
