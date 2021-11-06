@@ -4,6 +4,6 @@
 
 <br />
 
-### 2. electrical
+### 2. Electrical Characteristics
 
 ![electrical](https://user-images.githubusercontent.com/57129682/140594025-c9ceb74f-5ec3-4249-bd2d-f71456582de2.png)
