@@ -12,4 +12,4 @@
 
 ### 3. UART Communication
 
-![uart](https://user-images.githubusercontent.com/57129682/140594381-120b2a73-1ce8-4312-9452-b5b44ebef306.png)
+![uart](https://user-images.githubusercontent.com/57129682/140594444-69c3af44-2746-4ecd-9f08-3d4725ee0f5a.png)
