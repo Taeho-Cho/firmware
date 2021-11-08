@@ -1,7 +1,7 @@
 # DeviceDrivers
 
-### GasSensor\NevadaNano
+### 1. GasSensor\NevadaNano
 
-### CharacterLCD
+### 2. CharacterLCD
 
-### Accelerometer\ADXL355 (unfinished)
+### 3. Accelerometer\ADXL355 (unfinished)
