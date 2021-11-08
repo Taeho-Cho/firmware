@@ -3,10 +3,10 @@
 
 <br />
 
-### 2. Functional Block Diagram
-![diagram](https://user-images.githubusercontent.com/57129682/140726568-d8b61f95-4ebb-43cd-b4dd-54bcab22ce31.png)
+### 2. Evaluation Board schematic
+![schematic](https://user-images.githubusercontent.com/57129682/140691135-de2c512b-7206-4205-b7bd-8b2681c1cfaf.png)
 
 <br />
 
-### 3. Evaluation Board schematic
-![schematic](https://user-images.githubusercontent.com/57129682/140691135-de2c512b-7206-4205-b7bd-8b2681c1cfaf.png)
+### 3. Functional Block Diagram
+![diagram](https://user-images.githubusercontent.com/57129682/140726568-d8b61f95-4ebb-43cd-b4dd-54bcab22ce31.png)
