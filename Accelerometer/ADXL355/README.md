@@ -14,4 +14,4 @@
 <br />
 
 ### 4. Evaluation Board Pin Connection
-![eval_pins](https://user-images.githubusercontent.com/57129682/141031361-159ab0ab-d8bf-4b5a-8e8f-f363f658c685.png)
+![eval_pins](https://user-images.githubusercontent.com/57129682/141031718-51edd8a6-fdda-413c-93e9-b004a3be043a.png)
