@@ -26,3 +26,4 @@
 
 ### 6. I2C pin connection
 ![I2C](https://user-images.githubusercontent.com/57129682/141098664-be96155b-89bc-4d5e-9200-c624bf428573.png)
+* the pull-up resistor value is usually 4.7K. since I don't have a 4.7K resistor, I use the 1K resistors instead. 
