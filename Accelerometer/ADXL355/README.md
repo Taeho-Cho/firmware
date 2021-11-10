@@ -15,3 +15,7 @@
 
 ### 4. Evaluation Board Pin Connection
 ![eval_pins](https://user-images.githubusercontent.com/57129682/141031718-51edd8a6-fdda-413c-93e9-b004a3be043a.png)
+
+device address
+- when ASEL pin is low,  the address is 0x1D
+- when ASEL pin is high, the address is 0x53
