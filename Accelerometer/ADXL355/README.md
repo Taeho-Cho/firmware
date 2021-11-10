@@ -18,6 +18,6 @@
 
 <br />
 
-device address
+### 5. device address
 - when ASEL pin is low,  the address is 0x1D
 - when ASEL pin is high, the address is 0x53
