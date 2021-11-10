@@ -21,3 +21,8 @@
 ### 5. the device address
 - when ASEL pin is low,  the address is 0x1D
 - when ASEL pin is high, the address is 0x53
+
+<br />
+
+### 6. I2C pin connection
+![I2C](https://user-images.githubusercontent.com/57129682/141098664-be96155b-89bc-4d5e-9200-c624bf428573.png)
