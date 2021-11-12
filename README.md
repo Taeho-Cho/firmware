@@ -4,4 +4,4 @@
 
 ### 2. CharacterLCD
 
-### 3. Accelerometer\ADXL355 (unfinished)
+### 3. Accelerometer\ADXL355
