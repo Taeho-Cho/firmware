@@ -6,20 +6,24 @@
  */
 
 #include "NevadaNano.h"
+#include "UART_wrapper.h"
 
 
-#define RX_INTERRUPT_MODE 	1
+/* @defgroup  NevadaNano macros
+ * @{
+ */
+#define RESERVED           0x0U
+#define RX_BUFFERFER_SIZE  34U
+#define CRC_START_VALUE	   0xFFFF
+#define LOOP_LIMIT 	       20000U
+/*
+ * @}
+ */
 
-#if RX_INTERRUPT_MODE
-	#include "UART_wrapper.h"
-	#define LOOP_LIMIT 	20000
-#else
-	#include "usart.h"
-	#define	TX_TIMEOUT	1000
-	#define RX_TIMEOUT	2000
-#endif
 
-
+/* @defgroup NevadaNano static symbols
+ * @{
+ */
 static uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue);
 static bool sendPacket(eCOMMAND_t);
 static bool receivePacket(eCOMMAND_t);
@@ -27,10 +31,11 @@ static bool setRequestPacket(eCOMMAND_t);
 static bool setReplyPacket(eCOMMAND_t);
 static bool checkCRC(uint8_t *, eCOMMAND_t);
 
-
 static sNEVADANANO_HANDLER_t sNevadaNanoHandler;
-
 static uint8_t RX_BUFFER[RX_BUFFERFER_SIZE];
+/*
+ * @}
+ */
 
 
 bool initSensor(void)
@@ -40,24 +45,19 @@ bool initSensor(void)
 
 	HAL_Delay(3000);
 
-#if RX_INTERRUPT_MODE
 	UART_init(eUART_CHANNEL_4, 38400);
-#endif
 
 	sendPacket(eCOMMAND_STATUS);
-
-#if RX_INTERRUPT_MODE
 
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
 		if(receivePacket(eCOMMAND_STATUS) == true) break;
 	}
 
-	if(index == LOOP_LIMIT) ret = false;
-
-#else
-	if(receivePacket(eCOMMAND_STATUS) != true) ret = false;
-#endif
+	if(index == LOOP_LIMIT)
+	{
+		ret = false;
+	}
 
 	return ret;
 }
@@ -70,18 +70,15 @@ bool startMeasurement(void)
 
 	sendPacket(eCOMMAND_MEAS);
 
-#if RX_INTERRUPT_MODE
-
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
 		if(receivePacket(eCOMMAND_MEAS) == true) break;
 	}
 
-	if(index == LOOP_LIMIT) ret = false;
-
-#else
-	if(receivePacket(eCOMMAND_MEAS) != true) ret = false;
-#endif
+	if(index == LOOP_LIMIT)
+	{
+		ret = false;
+	}
 
 	HAL_Delay(1000);
 
@@ -98,18 +95,15 @@ bool getAnswer(void)
 
 	sendPacket(eCOMMAND_ANSWER);
 
-#if RX_INTERRUPT_MODE
-
 	for(index = 0; index <= LOOP_LIMIT; index++)
 	{
 		if(receivePacket(eCOMMAND_ANSWER) == true) break;
 	}
 
-	if(index == LOOP_LIMIT) ret = false;
-
-#else
-	if(receivePacket(eCOMMAND_ANSWER) != true) ret = false;
-#endif
+	if(index == LOOP_LIMIT)
+	{
+		ret = false;
+	}
 
 	return ret;
 }
@@ -118,57 +112,25 @@ bool getAnswer(void)
 static bool sendPacket(eCOMMAND_t comm)
 {
 	bool ret = true;
+	uint8_t size = 0;
 
 	setRequestPacket(comm);
 
-	switch (comm) {
+	switch(comm)
+	{
+	case eCOMMAND_STATUS : { size = sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REQUEST; } break;
+	case eCOMMAND_MEAS   : { size = sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REQUEST;   } break;
+	case eCOMMAND_ANSWER : { size = sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REQUEST; } break;
+	default              : { ret  = false; } break;
+	}
 
-	case eCOMMAND_STATUS: {
 
-#if RX_INTERRUPT_MODE
-		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REQUEST) != true)
-#else
-		if(HAL_UART_Transmit(&huart4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REQUEST, TX_TIMEOUT) != HAL_OK)
-#endif
+	if(ret == true)
+	{
+		if(UART_send(eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket, size) != true)
 		{
 			ret = false;
 		}
-	} break;
-
-
-	case eCOMMAND_MEAS: {
-
-#if RX_INTERRUPT_MODE
-		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REQUEST) != true)
-#else
-		if(HAL_UART_Transmit(&huart4, (uint8_t *)&sNevadaNanoHandler.RequestPacket,
-							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REQUEST, TX_TIMEOUT) != HAL_OK)
-#endif
-		{
-			ret = false;
-		}
-	} break;
-
-
-	case eCOMMAND_ANSWER: {
-
-#if RX_INTERRUPT_MODE
-		if(UART_send(	eUART_CHANNEL_4, (uint8_t*)&sNevadaNanoHandler.RequestPacket,
-						sizeof(sREQUEST_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REQUEST) != true)
-#else
-		if(HAL_UART_Transmit(&huart4, (uint8_t *)&sNevadaNanoHandler.RequestPacket,
-							 sizeof(sREQUEST_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REQUEST, TX_TIMEOUT) != HAL_OK)
-#endif
-		{
-			ret = false;
-		}
-	} break;
-
-	default: ret = false; break;
-
 	}
 
 	return ret;
@@ -178,56 +140,30 @@ static bool sendPacket(eCOMMAND_t comm)
 static bool receivePacket(eCOMMAND_t comm)
 {
 	bool ret = true;
+	uint8_t size = 0;
 
 	switch (comm) {
-
-	case eCOMMAND_STATUS: {
-
-#if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REPLY) != true)
-#else
-		if(HAL_UART_Receive(&huart4, RX_BUFFER,
-							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_STATUS_REPLY, RX_TIMEOUT) != HAL_OK)
-#endif
-		{
-			ret = false;
-		}
-	} break;
-
-
-	case eCOMMAND_MEAS: {
-
-#if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REPLY) != true)
-#else
-		if(HAL_UART_Receive(&huart4, RX_BUFFER,
-							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_MEAS_REPLY, RX_TIMEOUT) != HAL_OK)
-#endif
-		{
-			ret = false;
-		}
-	} break;
-
-
-	case eCOMMAND_ANSWER: {
-
-#if RX_INTERRUPT_MODE
-		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REPLY) != true)
-#else
-		if(HAL_UART_Receive(&huart4, RX_BUFFER,
-							sizeof(sREPLY_PACKET_HEADER_t) + ePAYLOAD_LENGTH_ANSWER_REPLY, RX_TIMEOUT) != HAL_OK)
-#endif
-		{
-			ret = false;
-		}
-	} break;
-
-	default: ret = false; break;
+	case eCOMMAND_STATUS : { size = sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_STATUS_REPLY; } break;
+	case eCOMMAND_MEAS   : { size = sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_MEAS_REPLY;   } break;
+	case eCOMMAND_ANSWER : { size = sizeof(sREPLY_PACKET_HEADER_t) + PAYLOAD_LENGTH_ANSWER_REPLY; } break;
+	default              : { ret  = false; } break;
 	}
+
+
+	if(ret == true){
+		if(UART_read(eUART_CHANNEL_4, RX_BUFFER, size) != true)
+		{
+			ret = false;
+		}
+	}
+
 
 	if(ret == true)
 	{
-		if (setReplyPacket(comm) != true) ret = false;
+		if (setReplyPacket(comm) != true)
+		{
+			ret = false;
+		}
 	}
 
 	return ret;
@@ -300,6 +236,7 @@ static bool setReplyPacket(eCOMMAND_t comm)
 
 	return ret;
 }
+
 
 bool checkCRC(uint8_t *buffer, eCOMMAND_t comm)
 {
@@ -390,3 +327,4 @@ uint16_t crc_generate(uint8_t *buffer, size_t length, uint16_t startValue)
 
   return crc;
 }
+

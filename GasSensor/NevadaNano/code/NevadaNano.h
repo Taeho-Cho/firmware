@@ -25,15 +25,6 @@
 #include "main.h"
 
 
-//#define READ_MPS_INFO
-
-#define RESERVED				0x0
-
-#define RX_BUFFERFER_SIZE 		34
-
-#define CRC_START_VALUE			0xFFFF
-
-
 typedef enum {
 	eSTATUS_OK 							= 0x00,
 	eSTATUS_CRC_FAILED 					= 0x01,
@@ -156,29 +147,7 @@ typedef struct {
 } sNEVADANANO_HANDLER_t;
 
 
-#ifdef READ_MPS_INFO
-typedef struct __attribute__((packed)) {
-	uint8_t SW_Version_W;
-	uint8_t SW_Version_X;
-	uint8_t SW_Version_Y;
-	uint8_t SW_Version_Z;
-	uint8_t HW_Version_W;
-	uint8_t HW_Version_X;
-	uint8_t Protocol_Version_W;
-	uint8_t Protocol_Version_X;
-} sVERSION_t;
-
-typedef struct __attribute__((packed)) {
-	char SERIAL_NUM[32];
-	uint32_t SENSOR_TYPE; 	// MPS Flammable Gas Sensor type = 0x03
-	char CAL_DATE[16]; 		// Date of last calibration, MM/DD/YYYY
-	char MFG_DATE[16]; 		// Date of manufacture,      MM/DD/YYYY
-} sSENSOR_INFO_t;
-#endif
-
-
-/*
- * @defgroup  MEASUREMENT_MODE
+/* @defgroup  MEASUREMENT_MODE
  * @{
  */
 #define MEASUREMENT_MODE_CONT 	0x2U 	/*!< continuous mode  */
@@ -188,8 +157,7 @@ typedef struct __attribute__((packed)) {
  */
 
 
-/*
- * @defgroup  CONCENTRATION_UNIT
+/* @defgroup  CONCENTRATION_UNIT
  * @{
  */
 #define CONCENTRATION_UNIT_ISO 	0x0U 	/*!< ISO 10156  	*/
@@ -199,8 +167,7 @@ typedef struct __attribute__((packed)) {
  */
 
 
-/*
- * @defgroup PAYLOAD_LENGTH
+/* @defgroup  PAYLOAD_LENGTH
  * @{
  */
 #define PAYLOAD_LENGTH_ZERO  0
