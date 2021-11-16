@@ -26,6 +26,13 @@
 
 
 typedef enum {
+	eERROR_NONE,
+	eERROR_TIMEOUT,
+	eERROR_INVALID_REPLY
+} eERROR_t;
+
+
+typedef enum {
 	eSTATUS_OK 							= 0x00,
 	eSTATUS_CRC_FAILED 					= 0x01,
 	eSTATUS_BAD_PARAM 					= 0x02,
@@ -138,12 +145,14 @@ typedef struct __attribute__((packed)) {
 
 
 typedef struct {
+
 	eCOMMAND_t		Comm; 	/*!< from the request packet */
 	eSTATUS_t 		Stat; 	/*!< from the   reply packet */
 
 	sREQUEST_PACKET_t RequestPacket;
 	sREPLY_PACKET_t   ReplyPacket;
 
+	eERROR_t  Error;
 } sNEVADANANO_HANDLER_t;
 
 
