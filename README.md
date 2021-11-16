@@ -1,7 +1,3 @@
 # DeviceDrivers
 
-### 1. GasSensor\NevadaNano
-
-### 2. CharacterLCD
-
-### 3. Accelerometer\ADXL355
+### each directory "GasSensor\NevadaNano", "CharacterLCD", "Accelerometer\ADXL355" has its own NEADME file in it
