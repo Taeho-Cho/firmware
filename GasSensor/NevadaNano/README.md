@@ -2,6 +2,8 @@
 
 ![GasSensor](https://user-images.githubusercontent.com/57129682/140594006-9ddd41d9-b810-4453-9a61-c0f2efb76461.png)
 
+this sensor is what I use for this code
+
 <br />
 
 ### 2. Electrical Characteristics
