@@ -227,6 +227,5 @@ bool startMeasurement(void);
 
 bool getAnswer(void);
 
-extern sNEVADANANO_HANDLER_t sNevadaNanoHandler;
 
 #endif /* DEVICE_NEVADANANO_NEVADANANO_H_ */
