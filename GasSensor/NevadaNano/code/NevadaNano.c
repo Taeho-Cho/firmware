@@ -38,11 +38,13 @@ static bool checkCRC(uint8_t *, eCOMMAND_t);
  * @}
  */
 
-static sNEVADANANO_HANDLER_t sNevadaNanoHandler;
 static uint8_t RX_BUFFER[RX_BUFFERFER_SIZE];
 /*
  * @}
  */
+
+
+sNEVADANANO_HANDLER_t sNevadaNanoHandler;
 
 
 bool initSensor(void)
