@@ -19,7 +19,7 @@
 
 <br />
 
-## 2. I2C
+## 2. I2C Communication
 ### Pin Connection
 ![pinout2](https://user-images.githubusercontent.com/57129682/141144880-79dde2ea-4680-4ae8-adee-db2da5898b00.png)
 
