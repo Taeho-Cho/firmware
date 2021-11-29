@@ -1,3 +1,5 @@
+[![Generic badge](https://img.shields.io/badge/Taeho-Cho-<COLOR>.svg)](https://shields.io/)
+
 #### Development Board
 - `NUCLEO-L476RG`
 
