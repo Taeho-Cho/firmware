@@ -6,6 +6,6 @@
 - OrCAD
 
 #### Device Driver codes
-- [GasSensor\NevadaNano](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/GasSensor/NevadaNano)
-- [CharacterLCD](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/characterLCD)
-- [Accelerometer\ADXL355](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/Accelerometer/ADXL355)
+- [NevadaNano Gas Sensor](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/GasSensor/NevadaNano)
+- [Character LCD](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/characterLCD)
+- [ADXL355 Accelerometer](https://github.com/Taeho-Cho/DeviceDrivers/tree/main/Accelerometer/ADXL355)
