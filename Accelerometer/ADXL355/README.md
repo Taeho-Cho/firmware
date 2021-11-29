@@ -23,7 +23,7 @@ this evaluation board is what I use for this code
 ### 5. I2C pin connection
 ![pinout2](https://user-images.githubusercontent.com/57129682/141144880-79dde2ea-4680-4ae8-adee-db2da5898b00.png)
 
-note) the pull-up resistance is usually 4.7K. since I don't have a 4.7K resistor, I use 1K resistors instead. 
+:exclamation: the pull-up resistance is usually 4.7K. since I don't have a 4.7K resistor, I use 1K resistors instead. 
 
 <br />
 
