@@ -227,7 +227,7 @@ static bool setReplyPacket(eCOMMAND_t comm)
 		return false;
 	}
 
-	sNevadaNanoHandler.Stat = (eSTATUS_t)tempReplyPacket.PacketHeader.Status;
+	sNevadaNanoHandler.Stat        = tempReplyPacket.PacketHeader.Status;
 	sNevadaNanoHandler.ReplyPacket = tempReplyPacket;
 
 	return true;
