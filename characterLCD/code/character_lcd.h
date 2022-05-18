@@ -35,7 +35,7 @@
 #include "GPIO_wrapper.h"
 
 #define _USE_LCD_RW_PIN_	0
-#define _USE_4_BIT_MODE_ 	1
+#define _USE_4_BIT_MODE_ 	0
 
 
 /* LCD IO pin settings begin */
@@ -127,8 +127,28 @@
 #define X_POSITION_MAX			0xF
 #define SECOND_LINE_OFFSET 		0x40
 
-#define ENABLE_CYCLE_DELAY		600
 
+/** @defgroup Wait Time in micro-second
+  * @{
+  */
+#define WAIT_TIME_CLEAR_DISPLAY					1520
+#define WAIT_TIME_RETURN_HOME					1520
+#define WAIT_TIME_ENTRY_MODE_SET				37
+#define WAIT_TIME_DISPLAY_ON_OFF				37
+#define WAIT_TIME_CURSOR_OR_DISPLAY_SHIFT		37
+#define WAIT_TIME_FUNCTION_SET					37
+#define WAIT_TIME_SET_CGRAM_ADDRESS				37
+#define WAIT_TIME_SET_DDRAM_ADDRESS				37
+#define WAIT_TIME_READ_BUSY_FLAG_AND_ADDRESS 	0
+#define WAIT_TIME_WRITE_DATA_TO_RAM				37
+#define WAIT_TIME_READ_DATA_FROM_RAM			37
+/**
+  * @}
+  */
+
+
+#define ENABLE_DELAY 1
+#define ENABLE_CYCLE_DELAY	600
 
 
 typedef struct{
@@ -154,6 +174,7 @@ typedef struct{
 	sGPIO_t DB7;
 
 } sLCD_IO_t;
+
 
 typedef struct {
 	char line1[NUMBER_OF_CHAR_IN_LINE];
