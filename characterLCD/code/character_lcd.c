@@ -8,7 +8,6 @@
 #include "usDelay.h"
 
 
-static void DataEnable(); /* refer to the Timing Diagram in the datasheet */
 static sLCD_HANDLER_t hLCD;
 
 #if _USE_4_BIT_MODE_
@@ -16,11 +15,11 @@ static void enable_4_bit_mode();
 #endif /* _USE_4_BIT_MODE_ */
 
 
-#define SET_RESET_ENABLE(_ONE_OR_ZERO_)		do{\
-												usDelay(ENABLE_DELAY);\
-												writeGPIO(&hLCD.IO.E, _ONE_OR_ZERO_);\
-												usDelay(ENABLE_DELAY);\
-											}while(0)
+#define SET_OR_RESET_ENABLE(_ONE_OR_ZERO_)		do{\
+													usDelay(ENABLE_DELAY);\
+													writeGPIO(&hLCD.IO.E, _ONE_OR_ZERO_);\
+													usDelay(ENABLE_DELAY);\
+												}while(0)
 
 
 void initLCD()
@@ -57,29 +56,27 @@ void initLCD()
 	hLCD.IO.DB7.port = LCD_DB7_GPIO_Port;
 	hLCD.IO.DB7.pin  = LCD_DB7_Pin;
 
-	memset(hLCD.data.line1, 0, NUMBER_OF_CHAR_IN_LINE);
-	memset(hLCD.data.line2, 0, NUMBER_OF_CHAR_IN_LINE);
 
 	hLCD.errorCode = eLCD_ERROR_NONE;
 
 
-	HAL_Delay(40); // Power On Wait Time is 40ms
+	HAL_Delay(POWER_ON_WAIT_TIME);
 
 	/* 2-line display setting */
 #if _USE_4_BIT_MODE_
 	/* only use DB4 ~ DB7 */
 	enable_4_bit_mode();
 
-	FunctionSet(0,1,0);
+	function_set(0,1,0);
 #else
-	FunctionSet(1,1,0);
+	function_set(1,1,0);
 #endif /* _USE_4_BIT_MODE_ */
 
 	/* display on */
-	DisplayOnOff(1,1,1);
+	display_on_off(1,1,1);
 
 	/* clear the LCD */
-	ClearDisplay();
+	clear_display();
 
 }
 
@@ -113,29 +110,25 @@ bool writeLCD(uint8_t xPosition, uint8_t yPosition, char *data, uint8_t size)
 		return false;
 	}
 
-	if(yPosition == 0)
+	/* set the DDRAM address */
+	if(yPosition == 1) // if it's the 2nd line to write
 	{
-		memset(&hLCD.data.line1[xPosition], 0, NUMBER_OF_CHAR_IN_LINE - xPosition);
-		memcpy(&hLCD.data.line1[xPosition], data, size);
+		set_DDRAM_address(SECOND_LINE_OFFSET + xPosition);
 	}
 	else
 	{
-		memset(&hLCD.data.line2[xPosition], 0, NUMBER_OF_CHAR_IN_LINE - xPosition);
-		memcpy(&hLCD.data.line2[xPosition], data, size);
+		set_DDRAM_address(xPosition);
 	}
 
-	ClearDisplay(); /* clear the LCD and set the AC to 0x00 */
-	for(uint8_t i = 0; i < NUMBER_OF_CHAR_IN_LINE; i++)
+	/* write data to the DDRAM */
+	for(uint8_t i = 0; i < size; i++)
 	{
-		if(hLCD.data.line1[i] == 0) WriteDataToRAM(' ');
-		else 						WriteDataToRAM(hLCD.data.line1[i]);
-	}
-
-	SetDDRAMaddress(SECOND_LINE_OFFSET); /* set the AC to 0x40 */
-	for(uint8_t i = 0; i < NUMBER_OF_CHAR_IN_LINE; i++)
-	{
-		if(hLCD.data.line2[i] == 0) WriteDataToRAM(' ');
-		else 						WriteDataToRAM(hLCD.data.line2[i]);
+		if(i + xPosition > X_POSITION_MAX)
+		{
+			hLCD.errorCode = eLCD_ERROR_X_POSITION_OUT_OF_RANGE;
+			break;
+		}
+		else write_data_to_RAM(data[i]);
 	}
 
 	return ret;
@@ -143,7 +136,7 @@ bool writeLCD(uint8_t xPosition, uint8_t yPosition, char *data, uint8_t size)
 
 
 
-void ClearDisplay()
+void clear_display()
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -160,10 +153,7 @@ void ClearDisplay()
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 1);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(1);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
@@ -175,54 +165,16 @@ void ClearDisplay()
 	writeGPIO(&hLCD.IO.DB0, 1);
 #endif /* _USE_4_BIT_MODE_ */
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 0);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(0);
 
-	//DataEnable();
-
-	usDelay(1600); // 1.52ms according to the ST7066U datasheet
+	usDelay(WAIT_TIME_CLEAR_DISPLAY);
 }
-#if 0
-void ClearDisplay()
-{
-	/* set the I/O pins */
-#if _USE_4_BIT_MODE_
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 0);
-	writeGPIO(&hLCD.IO.DB4, 0);
-
-	DataEnable();
-
-	writeGPIO(&hLCD.IO.DB4, 1);
-#else
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 0);
-	writeGPIO(&hLCD.IO.DB4, 0);
-	writeGPIO(&hLCD.IO.DB3, 0);
-	writeGPIO(&hLCD.IO.DB2, 0);
-	writeGPIO(&hLCD.IO.DB1, 0);
-	writeGPIO(&hLCD.IO.DB0, 1);
-#endif /* _USE_4_BIT_MODE_ */
-
-	DataEnable();
-
-	usDelay(1600); // 1.52ms according to the ST7066U datasheet
-}
-#endif
 
 
 /*
  * @brief  set DDRAM address to 0x00
  */
-void ReturnHome()
+void return_home()
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -239,9 +191,7 @@ void ReturnHome()
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
-	usDelay(ENABLE_DELAY);
-	writeGPIO(&hLCD.IO.E, 1);
-	usDelay(ENABLE_DELAY);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
@@ -253,13 +203,9 @@ void ReturnHome()
 	writeGPIO(&hLCD.IO.DB0, 0);
 #endif /* _USE_4_BIT_MODE_ */
 
-	usDelay(ENABLE_DELAY);
-	writeGPIO(&hLCD.IO.E, 0);
-	usDelay(ENABLE_DELAY);
+	SET_OR_RESET_ENABLE(0);
 
-	//DataEnable();
-
-	usDelay(1600); // 1.52ms according to the ST7066U datasheet
+	usDelay(WAIT_TIME_RETURN_HOME);
 }
 
 
@@ -267,7 +213,7 @@ void ReturnHome()
  * @param  I/D  1 for AC increment, 0 for AC decrement
  * @param  S    1 for screen shifting,  0 for no screen shifting
  */
-void EntryModeSet(uint8_t ID, uint8_t S)
+void entry_mode_set(uint8_t ID, uint8_t S)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -290,6 +236,8 @@ void EntryModeSet(uint8_t ID, uint8_t S)
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
@@ -304,9 +252,9 @@ void EntryModeSet(uint8_t ID, uint8_t S)
 	else 		writeGPIO(&hLCD.IO.DB0, 1);
 #endif /* _USE_4_BIT_MODE_ */
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
 
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_ENTRY_MODE_SET); // 37us according to the ST7066U datasheet
 }
 
 
@@ -315,7 +263,7 @@ void EntryModeSet(uint8_t ID, uint8_t S)
  * @param  C   1 for cursor on,  0 for cursor off
  * @param  B   1 for cursor blinking on, 0 for cursor blinking off
  */
-void DisplayOnOff(uint8_t D, uint8_t C, uint8_t B)
+void display_on_off(uint8_t D, uint8_t C, uint8_t B)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -341,10 +289,7 @@ void DisplayOnOff(uint8_t D, uint8_t C, uint8_t B)
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 1);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(1);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
@@ -362,63 +307,10 @@ void DisplayOnOff(uint8_t D, uint8_t C, uint8_t B)
 	else 		writeGPIO(&hLCD.IO.DB0, 1);
 #endif /* _USE_4_BIT_MODE_ */
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 0);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(0);
 
-	//DataEnable();
-
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_DISPLAY_ON_OFF);
 }
-#if 0
-void DisplayOnOff(uint8_t D, uint8_t C, uint8_t B)
-{
-	/* set the I/O pins */
-#if _USE_4_BIT_MODE_
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 0);
-	writeGPIO(&hLCD.IO.DB4, 0);
-
-	DataEnable();
-
-	writeGPIO(&hLCD.IO.DB7, 1);
-
-	if(D == 0)  writeGPIO(&hLCD.IO.DB6, 0);
-	else 		writeGPIO(&hLCD.IO.DB6, 1);
-
-	if(C == 0) 	writeGPIO(&hLCD.IO.DB5, 0);
-	else		writeGPIO(&hLCD.IO.DB5, 1);
-
-	if(B == 0) 	writeGPIO(&hLCD.IO.DB4, 0);
-	else 		writeGPIO(&hLCD.IO.DB4, 1);
-#else
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 0);
-	writeGPIO(&hLCD.IO.DB4, 0);
-	writeGPIO(&hLCD.IO.DB3, 1);
-
-	if(D == 0)  writeGPIO(&hLCD.IO.DB2, 0);
-	else 		writeGPIO(&hLCD.IO.DB2, 1);
-
-	if(C == 0) 	writeGPIO(&hLCD.IO.DB1, 0);
-	else		writeGPIO(&hLCD.IO.DB1, 1);
-
-	if(B == 0) 	writeGPIO(&hLCD.IO.DB0, 0);
-	else 		writeGPIO(&hLCD.IO.DB0, 1);
-#endif /* _USE_4_BIT_MODE_ */
-
-	DataEnable();
-
-	usDelay(40); // 37us according to the ST7066U datasheet
-}
-#endif
 
 
 /*
@@ -426,7 +318,7 @@ void DisplayOnOff(uint8_t D, uint8_t C, uint8_t B)
  * @param  S/C  1 for shift screen, 0 for shift cursor
  * @param  R/L  1 for shift to the right, 0 for shift to the left
  */
-void CursorOrDisplayShift(uint8_t SC, uint8_t RL)
+void cursor_or_display_shift(uint8_t SC, uint8_t RL)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -447,6 +339,8 @@ void CursorOrDisplayShift(uint8_t SC, uint8_t RL)
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
@@ -459,10 +353,9 @@ void CursorOrDisplayShift(uint8_t SC, uint8_t RL)
 	else 		writeGPIO(&hLCD.IO.DB2, 1);
 #endif /* _USE_4_BIT_MODE_ */
 
+	SET_OR_RESET_ENABLE(0);
 
-	DataEnable();
-
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_CURSOR_OR_DISPLAY_SHIFT);
 }
 
 
@@ -471,40 +364,33 @@ void CursorOrDisplayShift(uint8_t SC, uint8_t RL)
  * @param  N   1 for 2-line display,  0 for 1-line display
  * @param  F   1 for 5x11 dots font,  0 for 5x8 dots font
  */
-void FunctionSet(uint8_t DL, uint8_t N, uint8_t F)
+void function_set(uint8_t DL, uint8_t N, uint8_t F)
 {
 	/* set the I/O pins */
-#if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
+
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 1);
 
-	if(DL == 0) writeGPIO(&hLCD.IO.DB4, 0);
-	else 		writeGPIO(&hLCD.IO.DB4, 1);
+#if _USE_4_BIT_MODE_
 
-	DataEnable();
+	writeGPIO(&hLCD.IO.DB4, 0);
+
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	if(N == 0) 	writeGPIO(&hLCD.IO.DB7, 0);
 	else 		writeGPIO(&hLCD.IO.DB7, 1);
 
 	if(F == 0) 	writeGPIO(&hLCD.IO.DB6, 0);
 	else 		writeGPIO(&hLCD.IO.DB6, 1);
+
 #else
-	writeGPIO(&hLCD.IO.RS, 0);
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 1);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(1);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 1);
-
-	if(DL == 0) writeGPIO(&hLCD.IO.DB4, 0);
-	else 		writeGPIO(&hLCD.IO.DB4, 1);
+	writeGPIO(&hLCD.IO.DB4, 1);
 
 	if(N == 0) 	writeGPIO(&hLCD.IO.DB3, 0);
 	else 		writeGPIO(&hLCD.IO.DB3, 1);
@@ -513,61 +399,13 @@ void FunctionSet(uint8_t DL, uint8_t N, uint8_t F)
 	else 		writeGPIO(&hLCD.IO.DB2, 1);
 #endif /* _USE_4_BIT_MODE_ */
 
-	//usDelay(ENABLE_DELAY);
-	//writeGPIO(&hLCD.IO.E, 0);
-	//usDelay(ENABLE_DELAY);
-	SET_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(0);
 
-	//DataEnable();
-
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_FUNCTION_SET);
 }
-#if 0
-void FunctionSet(uint8_t DL, uint8_t N, uint8_t F)
-{
-	/* set the I/O pins */
-#if _USE_4_BIT_MODE_
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 1);
-
-	if(DL == 0) writeGPIO(&hLCD.IO.DB4, 0);
-	else 		writeGPIO(&hLCD.IO.DB4, 1);
-
-	DataEnable();
-
-	if(N == 0) 	writeGPIO(&hLCD.IO.DB7, 0);
-	else 		writeGPIO(&hLCD.IO.DB7, 1);
-
-	if(F == 0) 	writeGPIO(&hLCD.IO.DB6, 0);
-	else 		writeGPIO(&hLCD.IO.DB6, 1);
-#else
-	writeGPIO(&hLCD.IO.RS, 0);
-
-	writeGPIO(&hLCD.IO.DB7, 0);
-	writeGPIO(&hLCD.IO.DB6, 0);
-	writeGPIO(&hLCD.IO.DB5, 1);
-
-	if(DL == 0) writeGPIO(&hLCD.IO.DB4, 0);
-	else 		writeGPIO(&hLCD.IO.DB4, 1);
-
-	if(N == 0) 	writeGPIO(&hLCD.IO.DB3, 0);
-	else 		writeGPIO(&hLCD.IO.DB3, 1);
-
-	if(F == 0) 	writeGPIO(&hLCD.IO.DB2, 0);
-	else 		writeGPIO(&hLCD.IO.DB2, 1);
-#endif /* _USE_4_BIT_MODE_ */
-
-	DataEnable();
-
-	usDelay(40); // 37us according to the ST7066U datasheet
-}
-#endif
 
 
-void SetDDRAMaddress(uint8_t addr)
+void set_DDRAM_address(uint8_t addr)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -588,6 +426,8 @@ void SetDDRAMaddress(uint8_t addr)
 #else
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 1);
 
 	writeGPIO(&hLCD.IO.DB6, addr & (1<<6));
@@ -599,13 +439,13 @@ void SetDDRAMaddress(uint8_t addr)
 	writeGPIO(&hLCD.IO.DB0, addr & (1<<0));
 #endif /* _USE_4_BIT_MODE_ */
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
 
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_SET_DDRAM_ADDRESS);
 }
 
 
-void WriteDataToRAM(uint8_t data)
+void write_data_to_RAM(uint8_t data)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
@@ -625,6 +465,8 @@ void WriteDataToRAM(uint8_t data)
 #else
 	writeGPIO(&hLCD.IO.RS, 1);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, data & (1<<7));
 	writeGPIO(&hLCD.IO.DB6, data & (1<<6));
 	writeGPIO(&hLCD.IO.DB5, data & (1<<5));
@@ -635,21 +477,9 @@ void WriteDataToRAM(uint8_t data)
 	writeGPIO(&hLCD.IO.DB0, data & (1<<0));
 #endif /* _USE_4_BIT_MODE_ */
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
 
-	usDelay(40); // 37us according to the ST7066U datasheet
-}
-
-
-
-void DataEnable()
-{
-	/* enable cycle */
-	usDelay(ENABLE_CYCLE_DELAY);
-	writeGPIO(&hLCD.IO.E, 1);
-	usDelay(ENABLE_CYCLE_DELAY);
-	writeGPIO(&hLCD.IO.E, 0);
-	usDelay(ENABLE_CYCLE_DELAY);
+	usDelay(WAIT_TIME_WRITE_DATA_TO_RAM);
 }
 
 
@@ -660,13 +490,16 @@ static void enable_4_bit_mode()
 	/* set the I/O pins */
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 1);
 	writeGPIO(&hLCD.IO.DB4, 0);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	//DataEnable();
 
-	usDelay(40); // 37us according to the ST7066U datasheet
+	usDelay(WAIT_TIME_FUNCTION_SET);
 }
 #endif /* _USE_4_BIT_MODE_ */
