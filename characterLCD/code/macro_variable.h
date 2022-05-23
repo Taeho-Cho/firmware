@@ -14,7 +14,7 @@
  * 		@arg 0 : not use the 4-bit mode
  * 		@arg 1 :     use the 4-bit mode
  */
-#define _USE_4_BIT_MODE_ 	1
+#define _USE_4_BIT_MODE_ 	0
 
 
 /*

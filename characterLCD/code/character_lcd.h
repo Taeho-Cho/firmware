@@ -138,7 +138,7 @@ bool writeLCD(
  */
 
 
-/** @defgroup character LCD instruction functions
+/** @defgroup character LCD instructions
   * @{
   */
 void clear_display();

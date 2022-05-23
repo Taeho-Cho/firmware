@@ -22,6 +22,7 @@ static void enable_4_bit_mode();
 												}while(0)
 
 
+
 void initLCD()
 {
 	usDelayInit();
@@ -79,6 +80,7 @@ void initLCD()
 	clear_display();
 
 }
+
 
 
 /*
@@ -142,12 +144,15 @@ void clear_display()
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
 	writeGPIO(&hLCD.IO.DB4, 0);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB4, 1);
 #else
@@ -171,6 +176,7 @@ void clear_display()
 }
 
 
+
 /*
  * @brief  set DDRAM address to 0x00
  */
@@ -180,12 +186,15 @@ void return_home()
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
 	writeGPIO(&hLCD.IO.DB4, 0);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB5, 1);
 #else
@@ -209,6 +218,7 @@ void return_home()
 }
 
 
+
 /*
  * @param  I/D  1 for AC increment, 0 for AC decrement
  * @param  S    1 for screen shifting,  0 for no screen shifting
@@ -219,12 +229,15 @@ void entry_mode_set(uint8_t ID, uint8_t S)
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
 	writeGPIO(&hLCD.IO.DB4, 0);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB6, 1);
 
@@ -258,6 +271,7 @@ void entry_mode_set(uint8_t ID, uint8_t S)
 }
 
 
+
 /*
  * @param  D   1 for display on, 0 for display off
  * @param  C   1 for cursor on,  0 for cursor off
@@ -269,12 +283,15 @@ void display_on_off(uint8_t D, uint8_t C, uint8_t B)
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
 	writeGPIO(&hLCD.IO.DB4, 0);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 1);
 
@@ -313,6 +330,7 @@ void display_on_off(uint8_t D, uint8_t C, uint8_t B)
 }
 
 
+
 /*
  * @brief  move the cursor or shift the display
  * @param  S/C  1 for shift screen, 0 for shift cursor
@@ -324,12 +342,15 @@ void cursor_or_display_shift(uint8_t SC, uint8_t RL)
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 0);
 	writeGPIO(&hLCD.IO.DB4, 1);
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	if(SC == 0) writeGPIO(&hLCD.IO.DB7, 0);
 	else 		writeGPIO(&hLCD.IO.DB7, 1);
@@ -359,6 +380,7 @@ void cursor_or_display_shift(uint8_t SC, uint8_t RL)
 }
 
 
+
 /*
  * @param  DL  1 for 8-bit interface, 0 for 4-bit interface
  * @param  N   1 for 2-line display,  0 for 1-line display
@@ -367,6 +389,7 @@ void cursor_or_display_shift(uint8_t SC, uint8_t RL)
 void function_set(uint8_t DL, uint8_t N, uint8_t F)
 {
 	/* set the I/O pins */
+#if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
 
 	SET_OR_RESET_ENABLE(1);
@@ -374,9 +397,6 @@ void function_set(uint8_t DL, uint8_t N, uint8_t F)
 	writeGPIO(&hLCD.IO.DB7, 0);
 	writeGPIO(&hLCD.IO.DB6, 0);
 	writeGPIO(&hLCD.IO.DB5, 1);
-
-#if _USE_4_BIT_MODE_
-
 	writeGPIO(&hLCD.IO.DB4, 0);
 
 	SET_OR_RESET_ENABLE(0);
@@ -389,7 +409,13 @@ void function_set(uint8_t DL, uint8_t N, uint8_t F)
 	else 		writeGPIO(&hLCD.IO.DB6, 1);
 
 #else
+	writeGPIO(&hLCD.IO.RS, 0);
 
+	SET_OR_RESET_ENABLE(1);
+
+	writeGPIO(&hLCD.IO.DB7, 0);
+	writeGPIO(&hLCD.IO.DB6, 0);
+	writeGPIO(&hLCD.IO.DB5, 1);
 	writeGPIO(&hLCD.IO.DB4, 1);
 
 	if(N == 0) 	writeGPIO(&hLCD.IO.DB3, 0);
@@ -405,11 +431,14 @@ void function_set(uint8_t DL, uint8_t N, uint8_t F)
 }
 
 
+
 void set_DDRAM_address(uint8_t addr)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 0);
+
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, 1);
 
@@ -417,7 +446,8 @@ void set_DDRAM_address(uint8_t addr)
 	writeGPIO(&hLCD.IO.DB5, addr & (1<<5));
 	writeGPIO(&hLCD.IO.DB4, addr & (1<<4));
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, addr & (1<<3));
 	writeGPIO(&hLCD.IO.DB6, addr & (1<<2));
@@ -445,18 +475,22 @@ void set_DDRAM_address(uint8_t addr)
 }
 
 
+
 void write_data_to_RAM(uint8_t data)
 {
 	/* set the I/O pins */
 #if _USE_4_BIT_MODE_
 	writeGPIO(&hLCD.IO.RS, 1);
 
+	SET_OR_RESET_ENABLE(1);
+
 	writeGPIO(&hLCD.IO.DB7, data & (1<<7));
 	writeGPIO(&hLCD.IO.DB6, data & (1<<6));
 	writeGPIO(&hLCD.IO.DB5, data & (1<<5));
 	writeGPIO(&hLCD.IO.DB4, data & (1<<4));
 
-	DataEnable();
+	SET_OR_RESET_ENABLE(0);
+	SET_OR_RESET_ENABLE(1);
 
 	writeGPIO(&hLCD.IO.DB7, data & (1<<3));
 	writeGPIO(&hLCD.IO.DB6, data & (1<<2));
@@ -498,7 +532,6 @@ static void enable_4_bit_mode()
 	writeGPIO(&hLCD.IO.DB4, 0);
 
 	SET_OR_RESET_ENABLE(0);
-	//DataEnable();
 
 	usDelay(WAIT_TIME_FUNCTION_SET);
 }
