@@ -5,18 +5,18 @@
  *      Author: chotaeho
  */
 
-#include "ringbuffer.h"
+#include "ring_buffer.h"
+#include "string.h"
 
-
-void init(sRING_BUFFER_t *ringBuffer)
+void RB_init(sRING_BUFFER_t *ringBuffer)
 {
 	ringBuffer->head = 0;
 	ringBuffer->tail = 0;
-	memset(ringBuffer->buffer, 0, BUFFER_SIZE);
+	memset(ringBuffer->buffer, 0, RING_BUFFER_SIZE);
 }
 
 
-bool isEmpty(sRING_BUFFER_t *ringBuffer)
+bool RB_isEmpty(sRING_BUFFER_t *ringBuffer)
 {
 	bool ret = false;
 
@@ -26,43 +26,43 @@ bool isEmpty(sRING_BUFFER_t *ringBuffer)
 }
 
 
-bool isFull(sRING_BUFFER_t *ringBuffer)
+bool RB_isFull(sRING_BUFFER_t *ringBuffer)
 {
 	bool ret = false;
 
-	if(((ringBuffer->head + 1) % BUFFER_SIZE) == ringBuffer->tail) ret = true;
+	if(((ringBuffer->head + 1) % RING_BUFFER_SIZE) == ringBuffer->tail) ret = true;
 
 	return ret;
 }
 
 
-bool push(sRING_BUFFER_t *ringBuffer, uint8_t data)
+bool RB_push(sRING_BUFFER_t *ringBuffer, uint8_t data)
 {
 	bool ret = true;
 
-	if( isFull(ringBuffer) ) { ret = false; }
+	if( RB_isFull(ringBuffer) ) { ret = false; }
 	else { ringBuffer->buffer[ringBuffer->head++] = data; }
 
-	if(ringBuffer->head == BUFFER_SIZE) ringBuffer->head = 0;
+	if(ringBuffer->head == RING_BUFFER_SIZE) ringBuffer->head = 0;
 
 	return ret;
 }
 
 
-bool pop(sRING_BUFFER_t *ringBuffer, uint8_t *data)
+bool RB_pop(sRING_BUFFER_t *ringBuffer, uint8_t *data)
 {
 	bool ret = true;
 
-	if( isEmpty(ringBuffer) ) { ret = false; }
+	if( RB_isEmpty(ringBuffer) ) { ret = false; }
 	else { *data = ringBuffer->buffer[ringBuffer->tail++]; }
 
-	if(ringBuffer->tail == BUFFER_SIZE) ringBuffer->tail = 0;
+	if(ringBuffer->tail == RING_BUFFER_SIZE) ringBuffer->tail = 0;
 
 	return ret;
 }
 
 
-uint32_t numberOfData(sRING_BUFFER_t *ringBuffer)
+uint32_t RB_number_of_data(sRING_BUFFER_t *ringBuffer)
 {
-	return (ringBuffer->head + BUFFER_SIZE - ringBuffer->tail) % BUFFER_SIZE;
+	return (ringBuffer->head + RING_BUFFER_SIZE - ringBuffer->tail) % RING_BUFFER_SIZE;
 }

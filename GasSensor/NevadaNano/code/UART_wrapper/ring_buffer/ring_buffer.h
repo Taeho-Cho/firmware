@@ -5,13 +5,15 @@
  *      Author: chotaeho
  */
 
-#ifndef RINGBUFFER_RINGBUFFER_H_
-#define RINGBUFFER_RINGBUFFER_H_
+#ifndef RING_BUFFER_H_
+#define RING_BUFFER_H_
 
-#include "main.h"
+#include "stdint.h"
+#include "stdbool.h"
 
 
-#define BUFFER_SIZE	256
+
+#define RING_BUFFER_SIZE    128
 
 
 typedef enum {
@@ -25,17 +27,17 @@ typedef struct
 {
 	uint32_t head;
 	uint32_t tail;
-	uint8_t  buffer[BUFFER_SIZE];
+	uint8_t  buffer[RING_BUFFER_SIZE];
 	eERROR_CODE_t error_code;
 } sRING_BUFFER_t;
 
 
-void init(sRING_BUFFER_t*);
-bool isFull(sRING_BUFFER_t*);
-bool isEmpty(sRING_BUFFER_t*);
-bool push(sRING_BUFFER_t*, uint8_t);
-bool pop(sRING_BUFFER_t*, uint8_t*);
-uint32_t numberOfData(sRING_BUFFER_t*);
+void RB_init(sRING_BUFFER_t*);
+bool RB_isFull(sRING_BUFFER_t*);
+bool RB_isEmpty(sRING_BUFFER_t*);
+bool RB_push(sRING_BUFFER_t*, uint8_t);
+bool RB_pop(sRING_BUFFER_t*, uint8_t*);
+uint32_t RB_number_of_data(sRING_BUFFER_t*);
 
 
-#endif /* RINGBUFFER_RINGBUFFER_H_ */
+#endif /* RING_BUFFER_H_ */
